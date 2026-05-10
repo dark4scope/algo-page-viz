@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NSLB 题目入门讲解 — 华为算法挑战赛 S37</title>
+<style>
+  :root {
+    --bg: #0b1020;
+    --bg-2: #121a33;
+    --card: #18223f;
+    --line: #283354;
+    --text: #e5ecff;
+    --muted: #9ba8c9;
+    --accent: #6ee7ff;
+    --accent-2: #b794f6;
+    --good: #6ee7a3;
+    --warn: #f7b955;
+    --bad: #ff6e8a;
+    --leaf: #2dd4bf;
+    --spine: #b794f6;
+    --card-color: #f59e0b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+  body {
+    font-family: -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    line-height: 1.7;
+    font-size: 16px;
+  }
+  .wrap { max-width: 1020px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  .hero {
+    padding: 56px 28px 44px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #1a2548 0%, #2a1748 100%);
+    border: 1px solid var(--line);
+    margin-bottom: 36px;
+  }
+  .hero .tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: rgba(110, 231, 255, 0.12);
+    color: var(--accent);
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    margin: 0 0 12px;
+    font-size: 36px;
+    line-height: 1.25;
+    background: linear-gradient(120deg, #6ee7ff, #b794f6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero p { margin: 0; font-size: 18px; color: var(--muted); }
+
+  .toc {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 24px;
+    margin: 0 0 32px;
+    font-size: 14px;
+  }
+  .toc h3 { margin: 4px 0 8px; color: var(--accent); font-size: 14px; }
+  .toc ol {
+    margin: 0; padding-left: 20px;
+    column-count: 2; column-gap: 28px;
+  }
+  .toc li { margin: 3px 0; }
+  .toc a { color: var(--text); text-decoration: none; }
+  .toc a:hover { color: var(--accent); }
+  @media (max-width: 600px) { .toc ol { column-count: 1; } }
+
+  section {
+    margin: 44px 0;
+    padding: 28px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    scroll-margin-top: 20px;
+  }
+  section h2 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  section h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #0b1020;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  section .lead { color: var(--muted); margin: 0 0 18px; font-size: 15px; }
+  section h3 { margin: 22px 0 8px; font-size: 18px; color: var(--accent); }
+  section h4 { margin: 16px 0 6px; font-size: 15px; color: var(--accent-2); }
+  p { margin: 10px 0; }
+  code, .mono {
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    background: rgba(110, 231, 255, 0.10);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--accent);
+    font-size: 0.95em;
+  }
+  pre {
+    background: #0b1326;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    color: #d8dffe;
+    font-size: 14px;
+  }
+  ul, ol { padding-left: 22px; }
+  li { margin: 4px 0; }
+  .muted { color: var(--muted); }
+  .good { color: var(--good); }
+  .warn { color: var(--warn); }
+  .bad { color: var(--bad); }
+  hr { border: 0; border-top: 1px dashed var(--line); margin: 22px 0; }
+
+  .grid { display: grid; gap: 14px; }
+  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 720px) {
+    .grid.cols-2, .grid.cols-3, .grid.cols-4 { grid-template-columns: 1fr; }
+  }
+  .mini {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .mini .label { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
+  .mini .val { font-size: 22px; font-weight: 700; }
+
+  .topo-wrap {
+    background: linear-gradient(180deg, #0d1530, #131c3a);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    overflow-x: auto;
+  }
+  .topo-wrap svg { max-width: 100%; height: auto; min-width: 560px; }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin-top: 12px; font-size: 13px; color: var(--muted); }
+  .legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+  .calc-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 16px 0; }
+  .calc-row label { color: var(--muted); font-size: 14px; }
+  .calc-row input {
+    width: 70px;
+    padding: 6px 10px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 16px;
+  }
+  .calc-row .out {
+    padding: 6px 14px;
+    background: rgba(110, 231, 255, 0.12);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    color: var(--accent);
+    font-weight: 700;
+    font-family: "JetBrains Mono", monospace;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  th, td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+  th { color: var(--accent); font-weight: 600; }
+  td.center, th.center { text-align: center; }
+  td.right, th.right { text-align: right; }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 12px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 8px 16px;
+    background: var(--bg-2);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { border-color: var(--accent); }
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #0b1020;
+    border-color: transparent;
+    font-weight: 600;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .formula {
+    background: #0b1326;
+    border-left: 3px solid var(--accent);
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 15px;
+    line-height: 1.9;
+    border-radius: 0 8px 8px 0;
+    overflow-x: auto;
+  }
+  .formula.big { font-size: 17px; padding: 22px; text-align: center; }
+  .formula .neg { color: var(--bad); }
+  .formula .pos { color: var(--good); }
+  .formula .const { color: var(--warn); }
+
+  .ann {
+    background: rgba(247, 185, 85, 0.12);
+    border-left: 3px solid var(--warn);
+    padding: 10px 14px;
+    margin: 12px 0;
+    border-radius: 0 8px 8px 0;
+    font-size: 14px;
+  }
+  .ann.good { background: rgba(110, 231, 163, 0.12); border-left-color: var(--good); }
+  .ann.bad { background: rgba(255, 110, 138, 0.10); border-left-color: var(--bad); }
+  .ann .lbl { font-weight: 600; margin-right: 6px; }
+  .ann.good .lbl { color: var(--good); }
+  .ann .lbl { color: var(--warn); }
+  .ann.bad .lbl { color: var(--bad); }
+
+  .breakdown {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+    margin: 12px 0;
+  }
+  .breakdown .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--line);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+  }
+  .breakdown .row:last-child { border-bottom: 0; }
+  .breakdown .row.total {
+    border-top: 2px solid var(--accent);
+    border-bottom: 0;
+    margin-top: 6px;
+    padding-top: 10px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .breakdown .desc { color: var(--muted); }
+
+  .footer {
+    margin-top: 40px;
+    padding: 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    border-top: 1px solid var(--line);
+  }
+
+  details {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 8px 0;
+  }
+  details summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  details[open] summary { margin-bottom: 8px; }
+
+  @keyframes flow {
+    from { stroke-dashoffset: 20; }
+    to { stroke-dashoffset: 0; }
+  }
+  .flow-line { stroke-dasharray: 6 4; animation: flow 1.2s linear infinite; }
+
+  /* Curve plot */
+  .curve-plot {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    overflow-x: auto;
+  }
+  .curve-plot svg { max-width: 100%; height: auto; min-width: 480px; }
+  /* 小屏整体收紧 */
+  @media (max-width: 600px) {
+    .wrap { padding: 20px 14px 56px; }
+    section { padding: 18px; }
+    .hero { padding: 36px 20px 28px; }
+    .hero h1 { font-size: 28px; }
+    table { font-size: 13px; }
+    th, td { padding: 6px 8px; }
+    .formula { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HERO -->
+<div class="hero">
+  <span class="tag">华为算法挑战赛 S37 · 入门讲解</span>
+  <h1>AI 训练集群的「端口分配」是什么?</h1>
+  <p>从零开始理解这道题:几千张 GPU 互发数据时,如何让网络不堵车;评分公式怎么算到 100。</p>
+</div>
+
+<div class="toc">
+  <h3>目录</h3>
+  <ol>
+    <li><a href="#s1">故事:为什么有这道题?</a></li>
+    <li><a href="#s2">网络长什么样?(Leaf-Spine)</a></li>
+    <li><a href="#s3">算力卡编号公式</a></li>
+    <li><a href="#s4">"流"是什么?怎么读输入</a></li>
+    <li><a href="#s5">Job 和 Phase:嵌套关系</a></li>
+    <li><a href="#s6">你要做什么?(端口分配)</a></li>
+    <li><a href="#s7">三种冲突详解</a></li>
+    <li><a href="#s8">端口负载比 Maxsingle / Maxmulti</a></li>
+    <li><a href="#s9">评分公式:每一项含义</a></li>
+    <li><a href="#s10">反比例曲线:1.0 → 1.5 比 1.5 → 2.0 更要命</a></li>
+    <li><a href="#s11">算分演示:78 分是怎么来的?</a></li>
+    <li><a href="#s12">Example 2 三种解法对比</a></li>
+    <li><a href="#s13">FAQ:你可能想问的 N 个问题</a></li>
+    <li><a href="#s14">题目难点小结</a></li>
+  </ol>
+</div>
+
+<!-- 1. 故事背景 -->
+<section id="s1">
+  <h2><span class="num">1</span>故事:为什么会有这道题?</h2>
+  <p class="lead">先不看公式,先看一个真实场景。</p>
+
+  <p>训练一个大模型(比如 GPT 那种),需要 <strong>几百到几千张算力卡</strong>(GPU/NPU)同时干活。这些卡 <strong>不是独立的</strong>——每过一小段计算,它们就要把"自己算出的中间结果"发给其他卡,合并、再算下一步。</p>
+
+  <p>这就引出问题:<strong>这么多卡同时往网络里发数据,怎么不堵?</strong></p>
+
+  <div class="ann">
+    <span class="lbl">类比</span>想象一栋办公楼里 800 个员工同时去寄快递。如果楼下只有一个快递柜,大家要排队几小时;但如果有 32 个柜子,而且能聪明地把每个人导向不同的柜子,就几乎不用等。<strong>这道题就是给数据流找柜子。</strong>
+  </div>
+
+  <p>这道题让你写一个算法:给定一张训练任务"数据流图",决定每条流走哪条上行链路(哪个端口),让全网最拥堵的那条链路尽量轻,同时尽量避免不同时间段、不同任务之间互相打架。</p>
+</section>
+
+<!-- 2. 拓扑 -->
+<section id="s2">
+  <h2><span class="num">2</span>网络长什么样?(Leaf-Spine 拓扑)</h2>
+  <p class="lead">数据中心常用的两层网,理解它就理解了 80% 的题。</p>
+
+  <p>整个集群分两层交换机:</p>
+  <ul>
+    <li><strong>Leaf 交换机</strong>(下层,绿色):每个 Leaf 直连一群算力卡(<code>p × r</code> 张)</li>
+    <li><strong>Spine 交换机</strong>(上层,紫色):连接所有 Leaf,负责跨 Leaf 转发</li>
+    <li>每个 Leaf 有 <code>p</code> 个上行端口,分别接到 <code>p</code> 个 Spine</li>
+  </ul>
+
+  <p>下面是 Example 1 的真实网络(<code>l=2, p=2, r=2</code>,共 8 张卡):</p>
+
+  <div class="topo-wrap">
+    <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg">
+      <rect x="120" y="20" width="120" height="44" rx="8" fill="#2a1f4a" stroke="#b794f6" stroke-width="2"/>
+      <text x="180" y="46" text-anchor="middle" fill="#e5ecff" font-size="14" font-weight="600">Spine 0</text>
+      <rect x="480" y="20" width="120" height="44" rx="8" fill="#2a1f4a" stroke="#b794f6" stroke-width="2"/>
+      <text x="540" y="46" text-anchor="middle" fill="#e5ecff" font-size="14" font-weight="600">Spine 1</text>
+
+      <rect x="80" y="160" width="160" height="44" rx="8" fill="#0f3a32" stroke="#2dd4bf" stroke-width="2"/>
+      <text x="160" y="186" text-anchor="middle" fill="#e5ecff" font-size="14" font-weight="600">Leaf 0</text>
+      <rect x="480" y="160" width="160" height="44" rx="8" fill="#0f3a32" stroke="#2dd4bf" stroke-width="2"/>
+      <text x="560" y="186" text-anchor="middle" fill="#e5ecff" font-size="14" font-weight="600">Leaf 1</text>
+
+      <g stroke-width="2" fill="none">
+        <line x1="120" y1="160" x2="160" y2="64" stroke="#6ee7ff"/>
+        <line x1="200" y1="160" x2="540" y2="64" stroke="#6ee7ff"/>
+        <line x1="520" y1="160" x2="200" y2="64" stroke="#6ee7ff"/>
+        <line x1="600" y1="160" x2="560" y2="64" stroke="#6ee7ff"/>
+      </g>
+      <g fill="#9ba8c9" font-size="11" font-family="JetBrains Mono, monospace">
+        <text x="116" y="120">port 0</text>
+        <text x="200" y="120">port 1</text>
+        <text x="500" y="120">port 0</text>
+        <text x="588" y="120">port 1</text>
+      </g>
+
+      <g>
+        <circle cx="100" cy="290" r="20" fill="#3d2a08" stroke="#f59e0b" stroke-width="2"/>
+        <text x="100" y="295" text-anchor="middle" fill="#fef3c7" font-size="14" font-weight="700">0</text>
+        <circle cx="145" cy="290" r="20" fill="#3d2a08" stroke="#f59e0b" stroke-width="2"/>
+        <text x="145" y="295" text-anchor="middle" fill="#fef3c7" font-size="14" font-weight="700">1</text>
+        <circle cx="190" cy="290" r="20" fill="#3d2a08" stroke="#f59e0b" stroke-width="2"/>
+        <text x="190" y="295" text-anchor="middle" fill="#fef3c7" font-size="14" font-weight="700">2</text>
+        <circle cx="235" cy="290" r="20" fill="#3d2a08" stroke="#f59e0b" stroke-width="2"/>
+        <text x="235" y="295" text-anchor="middle" fill="#fef3c7" font-size="14" font-weight="700">3</text>
+      </g>
+      <g stroke="#f59e0b" stroke-width="1" opacity="0.5">
+        <line x1="100" y1="270" x2="120" y2="204"/>
+        <line x1="145" y1="270" x2="140" y2="204"/>
+        <line x1="190" y1="270" x2="180" y2="204"/>
+        <line x1="235" y1="270" x2="200" y2="204"/>
+      </g>
+
+      <g>
+        <circle cx="500" cy="290" r="20" fill="#3d2a08" stroke="#f59e0b" stroke-width="2"/>
+        <text x="500" y="295" text-anchor="middle" fill="#fef3c7" font-size="14" font-weight="700">4</text>
+        <circle cx="545" cy="290" r="20" fill="#3d2a08" stroke="#f59e0b" stroke-width="2"/>
+        <text x="545" y="295" text-anchor="middle" fill="#fef3c7" font-size="14" font-weight="700">5</text>
+        <circle cx="590" cy="290" r="20" fill="#3d2a08" stroke="#f59e0b" stroke-width="2"/>
+        <text x="590" y="295" text-anchor="middle" fill="#fef3c7" font-size="14" font-weight="700">6</text>
+        <circle cx="635" cy="290" r="20" fill="#3d2a08" stroke="#f59e0b" stroke-width="2"/>
+        <text x="635" y="295" text-anchor="middle" fill="#fef3c7" font-size="14" font-weight="700">7</text>
+      </g>
+      <g stroke="#f59e0b" stroke-width="1" opacity="0.5">
+        <line x1="500" y1="270" x2="520" y2="204"/>
+        <line x1="545" y1="270" x2="540" y2="204"/>
+        <line x1="590" y1="270" x2="580" y2="204"/>
+        <line x1="635" y1="270" x2="600" y2="204"/>
+      </g>
+
+      <text x="360" y="340" text-anchor="middle" fill="#9ba8c9" font-size="12">
+        l=2 个 Leaf,每个 Leaf 有 p=2 个上行端口、p×r=4 张算力卡
+      </text>
+    </svg>
+    <div class="legend">
+      <span><span class="dot" style="background:#b794f6"></span>Spine 交换机</span>
+      <span><span class="dot" style="background:#2dd4bf"></span>Leaf 交换机</span>
+      <span><span class="dot" style="background:#f59e0b"></span>算力卡</span>
+      <span><span class="dot" style="background:#6ee7ff"></span>上行链路(端口)</span>
+    </div>
+  </div>
+
+  <h3>关键洞察</h3>
+  <ul>
+    <li><strong>同 Leaf 内</strong>两张卡通信(比如卡 0 → 卡 1):走 Leaf 内部,<strong>不占用</strong>上行端口,在题里记为 <code>port = -1</code></li>
+    <li><strong>跨 Leaf</strong>通信(比如卡 2 → 卡 6):必须走 Leaf → Spine → Leaf,<strong>必须选一个上行端口</strong> <code>port ∈ [0, p-1]</code></li>
+    <li>"端口分配"就是替每条跨 Leaf 流挑端口</li>
+  </ul>
+
+  <h3>规模上限(竞赛规则)</h3>
+  <table>
+    <tr><th>符号</th><th>含义</th><th class="right">上限</th></tr>
+    <tr><td><code>n</code></td><td>Job(作业)数</td><td class="right">40</td></tr>
+    <tr><td><code>l</code></td><td>Leaf 数</td><td class="right">100</td></tr>
+    <tr><td><code>p</code></td><td>每 Leaf 上行端口数 = Spine 数</td><td class="right">32</td></tr>
+    <tr><td><code>r</code></td><td>带宽比 = 单端口冲突容量</td><td class="right">4</td></tr>
+    <tr><td><code>m_j</code></td><td>每 Job 的 Phase 数</td><td class="right">31</td></tr>
+    <tr><td><code>f</code></td><td>每 Phase 的流数</td><td class="right">12800</td></tr>
+  </table>
+  <p class="muted">最坏情况共 <code>40 × 31 × 12800 ≈ 1500 万</code> 条流,<strong>5 秒内</strong>给每条流定 port。</p>
+</section>
+
+<!-- 3. 算力卡编号 -->
+<section id="s3">
+  <h2><span class="num">3</span>算力卡编号:从一个数字反推它在哪</h2>
+  <p class="lead">题目给你的是卡号(0、1、2、…),你必须算出它住在哪个 Leaf。</p>
+
+  <div class="formula big">
+    card_id = p × r × i + j
+    <div style="color:var(--muted); font-size:13px; margin-top:6px;">i = Leaf 编号, j = 该 Leaf 下属卡的序号</div>
+  </div>
+
+  <p>反过来:已知 <code>card_id</code>,要求 Leaf 编号:</p>
+  <pre>leaf = card_id / (p * r)        // 整除
+slot = card_id % (p * r)        // 在 Leaf 内的位置</pre>
+
+  <h3>来算一下:</h3>
+  <div class="calc-row">
+    <label>p =</label><input type="number" id="calcP" value="2" min="1">
+    <label>r =</label><input type="number" id="calcR" value="2" min="1">
+    <label>card_id =</label><input type="number" id="calcCard" value="6" min="0">
+    <span>→ 在 <span class="out" id="calcOut">Leaf ?</span></span>
+  </div>
+  <p class="muted">默认 Example 1 的参数(<code>p=2, r=2</code>),卡 6 应该在 Leaf 1。改改参数试试。</p>
+</section>
+
+<!-- 4. 流的格式 -->
+<section id="s4">
+  <h2><span class="num">4</span>"流"是什么?怎么读输入?</h2>
+  <p class="lead">一条流 = 卡 A 给卡 B 发一份数据。读法很反直觉,小心踩坑。</p>
+
+  <p>题目用 <strong>"src dst src dst …"</strong> 成对解析。看 Example 1 Job1 的这一行:</p>
+  <pre>2 3 3 6 6 7 7 2</pre>
+  <p>它表示 4 条流:</p>
+  <ul>
+    <li>流 1: <code>2 → 3</code>(同 Leaf 0,内部流)</li>
+    <li>流 2: <code>3 → 6</code>(Leaf 0 → Leaf 1,跨 Leaf)</li>
+    <li>流 3: <code>6 → 7</code>(同 Leaf 1,内部流)</li>
+    <li>流 4: <code>7 → 2</code>(Leaf 1 → Leaf 0,跨 Leaf)</li>
+  </ul>
+
+  <div class="ann">
+    <span class="lbl">易错</span>很多人(包括我)第一次会以为前一半是 src 列、后一半是 dst 列。<strong>不是。</strong>是 <code>src1 dst1 src2 dst2 …</code> 严格成对。
+  </div>
+
+  <div class="ann">
+    <span class="lbl">易错</span>同一 Phase 里,<strong>同一张卡可以同时当一次 src 和一次 dst</strong>。例如上面卡 3:在流 1 里当 dst,在流 2 里当 src,合法。但不能当两次 src 或两次 dst。
+  </div>
+</section>
+
+<!-- 5. Job/Phase -->
+<section id="s5">
+  <h2><span class="num">5</span>Job 和 Phase:层层嵌套</h2>
+  <p class="lead">想象成俄罗斯套娃:训练集群 ⊃ Job ⊃ Phase ⊃ Flow。</p>
+
+  <div class="grid cols-2">
+    <div class="mini">
+      <div class="label">Job(作业)</div>
+      <div class="val">最多 n=40 个</div>
+      <p class="muted" style="margin-top:6px; font-size:13px;">一个独立的训练任务,有自己的卡、自己的通信模式。多个 Job 同时跑在集群上,互相 <em>独立</em> 但 <em>共享网络</em>。</p>
+    </div>
+    <div class="mini">
+      <div class="label">Phase(阶段)</div>
+      <div class="val">每 Job 最多 m=31 个</div>
+      <p class="muted" style="margin-top:6px; font-size:13px;">同一 Job 内部按时间分阶段。同一 Phase 内的流"同时发生",不同 Phase 串行。</p>
+    </div>
+    <div class="mini">
+      <div class="label">Flow(流)</div>
+      <div class="val">每 Phase 最多 f=12800 条</div>
+      <p class="muted" style="margin-top:6px; font-size:13px;">最小单元:卡 A → 卡 B 一份数据。你的算法要给每条 <em>跨 Leaf</em> 流分配一个端口。</p>
+    </div>
+    <div class="mini">
+      <div class="label">在线决策</div>
+      <div class="val">读完一 Job → 立刻输出</div>
+      <p class="muted" style="margin-top:6px; font-size:13px;">这是个<strong>在线问题</strong>:决定 Job1 的端口时,看不到 Job2、Job3 长什么样。</p>
+    </div>
+  </div>
+
+  <h3>一个 Job 的输入示例(Example 2 Job1)</h3>
+  <pre>1 4                  ← 1 个 Phase, 4 条流
+0 4 4 0 1 5 5 1      ← Phase 1 的 4 条流: (0,4)(4,0)(1,5)(5,1)</pre>
+
+  <div class="ann bad">
+    <span class="lbl">在线协议·全题最大难点</span>题目协议是<strong>交互式流</strong>:
+    <pre style="margin-top:6px; background:transparent; border:none; padding:0; font-size:13px;">读 Job 1 输入 → 立刻输出 Job 1 端口分配 → 读 Job 2 输入 → 立刻输出 Job 2 ...</pre>
+    决定 Job 1 时<strong>看不到</strong> Job 2/3 的内容。但 Job 间冲突恰恰需要"全局协调",这就是这道题难的根源——你必须用一个能与"未来未知 Job"兼容的策略。
+  </div>
+</section>
+
+<!-- 6. 你的任务 -->
+<section id="s6">
+  <h2><span class="num">6</span>所以你要做什么?</h2>
+  <p class="lead">一句话:对每条跨 Leaf 流,选一个 port ∈ [0, p-1]。</p>
+
+  <p>对 Example 1 Job1 的 4 条流,完美的端口分配是这样:</p>
+
+  <div class="topo-wrap">
+    <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg">
+      <rect x="120" y="20" width="120" height="44" rx="8" fill="#2a1f4a" stroke="#b794f6" stroke-width="2"/>
+      <text x="180" y="46" text-anchor="middle" fill="#e5ecff" font-size="14" font-weight="600">Spine 0</text>
+      <rect x="480" y="20" width="120" height="44" rx="8" fill="#2a1f4a" stroke="#b794f6" stroke-width="2"/>
+      <text x="540" y="46" text-anchor="middle" fill="#e5ecff" font-size="14" font-weight="600">Spine 1</text>
+
+      <rect x="80" y="160" width="160" height="44" rx="8" fill="#0f3a32" stroke="#2dd4bf" stroke-width="2"/>
+      <text x="160" y="186" text-anchor="middle" fill="#e5ecff" font-size="14" font-weight="600">Leaf 0</text>
+      <rect x="480" y="160" width="160" height="44" rx="8" fill="#0f3a32" stroke="#2dd4bf" stroke-width="2"/>
+      <text x="560" y="186" text-anchor="middle" fill="#e5ecff" font-size="14" font-weight="600">Leaf 1</text>
+
+      <g stroke="#6ee7a3" stroke-width="2.5" fill="none" class="flow-line">
+        <path d="M 200 160 Q 370 80 540 64" />
+        <path d="M 540 160 Q 370 90 200 64" />
+      </g>
+      <g stroke="#f7b955" stroke-width="2" fill="none" stroke-dasharray="4 3">
+        <path d="M 190 270 Q 215 250 235 270" />
+        <path d="M 590 270 Q 615 250 635 270" />
+      </g>
+      <text x="195" y="245" fill="#f7b955" font-size="11">2→3 内部</text>
+      <text x="595" y="245" fill="#f7b955" font-size="11">6→7 内部</text>
+      <text x="370" y="100" text-anchor="middle" fill="#6ee7a3" font-size="13" font-weight="600">3→6 走 port 1</text>
+      <text x="370" y="135" text-anchor="middle" fill="#6ee7a3" font-size="13" font-weight="600">7→2 走 port 1</text>
+
+      <g fill="#3d2a08" stroke="#f59e0b" stroke-width="2">
+        <circle cx="100" cy="290" r="18"/><circle cx="145" cy="290" r="18"/>
+        <circle cx="190" cy="290" r="18"/><circle cx="235" cy="290" r="18"/>
+        <circle cx="500" cy="290" r="18"/><circle cx="545" cy="290" r="18"/>
+        <circle cx="590" cy="290" r="18"/><circle cx="635" cy="290" r="18"/>
+      </g>
+      <g fill="#fef3c7" font-size="13" font-weight="700" text-anchor="middle">
+        <text x="100" y="295">0</text><text x="145" y="295">1</text>
+        <text x="190" y="295">2</text><text x="235" y="295">3</text>
+        <text x="500" y="295">4</text><text x="545" y="295">5</text>
+        <text x="590" y="295">6</text><text x="635" y="295">7</text>
+      </g>
+    </svg>
+  </div>
+
+  <p>对应的输出:</p>
+  <pre>4
+2 3 -1   3 6 1   6 7 -1   7 2 1
+↑       ↑        ↑        ↑
+内部 -1  跨 Leaf 选 port 1  内部 -1   跨 Leaf 选 port 1</pre>
+  <p>这个分配让 2 条跨 Leaf 流都走 port 1,看起来"挤一起",但因为 <code>r=2</code>(端口能扛 2 条流),没问题。实际上这是题面给的满分解。</p>
+
+  <div class="ann good">
+    <span class="lbl">承上启下</span>从第 7 章开始,我们只关心一件事:<strong>每个 (Leaf, port, 方向) 上同时挂了多少条流。超过 r 的部分 = 冲突。</strong>下面把"冲突"按发生时机拆成三类。
+  </div>
+</section>
+
+<!-- 7. 三种冲突 -->
+<section id="s7">
+  <h2><span class="num">7</span>什么算"堵车"?三类冲突详解</h2>
+  <p class="lead">堵车的代价是要扣分的。三种冲突权重不一样,Phase 内最严重。</p>
+
+  <div class="grid cols-3">
+    <div class="mini" style="border-left: 4px solid var(--bad);">
+      <div class="label">Phase 内冲突 <span class="bad" style="font-weight:700">×12</span></div>
+      <div class="val" style="font-size:18px; color:var(--bad)">最严重</div>
+    </div>
+    <div class="mini" style="border-left: 4px solid var(--warn);">
+      <div class="label">Phase 间冲突 <span class="warn" style="font-weight:700">×5</span></div>
+      <div class="val" style="font-size:18px; color:var(--warn)">中等</div>
+    </div>
+    <div class="mini" style="border-left: 4px solid var(--accent-2);">
+      <div class="label">Job 间冲突 <span style="color:var(--accent-2); font-weight:700">×3</span></div>
+      <div class="val" style="font-size:18px; color:var(--accent-2)">最轻</div>
+    </div>
+  </div>
+
+  <div class="ann">
+    <span class="lbl">前置约定</span>下面所有"端口"都按 <strong>(Leaf, port, 方向 in/out)</strong> 三元组分别计——一条 src→dst 流同时占用 (srcLeaf, port, <code>out</code>) 和 (dstLeaf, port, <code>in</code>) 两条记录。下面 r=2 默认。
+  </div>
+
+  <h3>7.1 Phase 内冲突 <span class="bad">C_inphsc</span>(权重 ×12)</h3>
+  <p><strong>定义</strong>:同一个 Job 的同一个 Phase 内,某个 (Leaf, port, 方向) 上挂的流数 <code>v &gt; r</code> 时,<strong>超出量</strong> <code>v − r</code> 计入。</p>
+
+  <pre>for each (Job j, Phase k, Leaf i, Port p, dir ∈ {out, in}):
+    v = 该端口该方向的流数
+    if v &gt; r:
+        C_inphsc += v - r</pre>
+
+  <h4>例子</h4>
+  <p>某 Phase 中 (Leaf0, port 0, <code>out</code>) 上有 4 条流向外发的流 → <code>4 − 2 = 2</code> 计入 C_inphsc。</p>
+
+  <h4>类比 — 电梯瞬时超载</h4>
+  <p>电梯额定 r=2 人,你硬塞 4 人 → 超载 2 人,瞬时冲突。第 3、4 个人就是 C_inphsc。</p>
+
+  <hr>
+
+  <h3>7.2 Phase 间冲突 <span class="warn">C_btphsc</span>(权重 ×5)</h3>
+  <p><strong>定义</strong>:同一个 Job 内,<strong>同一张源卡</strong>(同一个 src)在<strong>相邻 Phase</strong> 选了<strong>不同的 port</strong>。每发生一次切换,<code>C_btphsc += 1</code>。</p>
+
+  <div class="ann bad">
+    <span class="lbl">易错</span>这<strong>不是</strong>"占用累加超 r"。它惩罚的是<strong>同源流跨阶段换路</strong>——硬件上每次换路都要做端口切换/缓冲腾挪,有真实开销。
+  </div>
+
+  <pre>for each Job j:
+    for each Phase k &gt; 0:
+        for each src 卡 s:
+            prev_port = s 在 Phase k-1 的输出 port  (跳过 -1)
+            this_port = s 在 Phase k   的输出 port  (跳过 -1)
+            if prev_port ≠ this_port:
+                C_btphsc += 1</pre>
+
+  <h4>例子</h4>
+  <p>Job 1 的卡 5 在 Phase 1 把流 5→11 走 port 0,在 Phase 2 把流 5→9 走 port 1 → 卡 5 这一次切换计 <code>C_btphsc += 1</code>。</p>
+
+  <h4>类比 — 快递员临时换路线</h4>
+  <p>同一个快递员上午走 A 路、下午改走 B 路 — 每次换路要重新规划 + 装车,产生切换成本。</p>
+
+  <hr>
+
+  <h3>7.3 Job 间冲突 <span style="color:var(--accent-2)">C_bttskc</span>(权重 ×3)</h3>
+  <p><strong>定义</strong>:某条流的端口被<strong>它所在 Phase 的负载 + 其他 Job 在该端口的 max-Phase 之和</strong>累加超出 r 时,这条流计 1。</p>
+
+  <div class="ann bad">
+    <span class="lbl">两个关键口径</span>
+    <ol style="margin: 6px 0 0 18px;">
+      <li><strong>每个 Job 取它在该端口的 max Phase</strong>(因为不同 Job 之间不知道彼此 Phase 对齐,只能取最坏情形)</li>
+      <li><strong>是命中流数,不是超出量</strong>——只要某条流"踩中"超载端口,这条流就 +1,不管端口超了多少</li>
+    </ol>
+  </div>
+
+  <pre>// 先对每个 Job 算它在每个 (Leaf, port, dir) 上的 max-Phase 流数 jmax[j]
+// 全局累加: multi[(L,p,dir)] = Σ_j jmax[j][(L,p,dir)]
+
+for each Job j:
+    for each Phase k:
+        for each flow (s, d) in Phase k:
+            ext_out = multi[(srcLeaf, port, out)] - jmax[j][(srcLeaf, port, out)]
+            ext_in  = multi[(dstLeaf, port, in)]  - jmax[j][(dstLeaf, port, in)]
+            if phase_load_out + ext_out &gt; r  OR  phase_load_in + ext_in &gt; r:
+                C_bttskc += 1     ← 命中流 +1</pre>
+
+  <h4>例子</h4>
+  <p>设 (Leaf 2, port 1, <code>out</code>) 上累加:</p>
+  <ul>
+    <li>Job 1: max-Phase = 0 条</li>
+    <li>Job 2: max-Phase = 2 条</li>
+    <li>Job 3: max-Phase = 2 条</li>
+    <li>multi = 0 + 2 + 2 = 4 &gt; r=2 → 端口超载</li>
+  </ul>
+  <p>对 Job 2 的 2 条流:本 Phase 负载 2 + 其他 Job(=Job 3) max=2 → 4 &gt; r=2,<strong>这 2 条全部命中,C_bttskc += 2</strong>;Job 3 同理 +2。Job 1 这条端口上没流,不命中。</p>
+</section>
+
+<!-- 8. 端口比 -->
+<section id="s8">
+  <h2><span class="num">8</span>端口负载比 Maxsingle / Maxmulti</h2>
+  <p class="lead">这是评分里的大头——80 分都来自这两个比值。</p>
+
+  <p>对每个端口(每个 Leaf 的 p 个上行口),统计上面挂了多少条流。除以 r,就是它的"负载比"。比值越接近 1.0 越好。</p>
+
+  <h3>Maxsingle_r:单 Job 内最大端口比</h3>
+  <pre>Maxsingle_r = max(1.0, Maxsingle_c / r)
+Maxsingle_c = max over (Job j, Phase k, Leaf i, Port p, dir ∈ {out, in})
+              [ 该 (Leaf, port, dir) 在该 Phase 的流数 ]</pre>
+  <p class="muted">每个 Job 内部独立看,所有 (Leaf, port, 方向) 三元组里最挤的那个。反映 <em>单个任务</em> 占用网络的均匀度。</p>
+
+  <h3>Maxmulti_r:全局最大端口比</h3>
+  <pre>Maxmulti_r = max(1.0, Maxmulti_c / r)
+Maxmulti_c = max over (Leaf i, Port p, dir ∈ {out, in})
+             [ Σ_j 各 Job 的 max-Phase 流数 ]</pre>
+  <p class="muted">所有 Job 叠加之后,所有 (Leaf, port, 方向) 三元组里最挤的那个。反映 <em>整个集群</em> 的拥堵峰值。</p>
+
+  <div class="ann">
+    <span class="lbl">关键</span><code>max(1, ·)</code> 截断意味着流数 ≤ r 时该项就拿满 40 分,<strong>不会因为"端口很空"额外加分</strong>;比值 &gt; 1 时按反比例曲线扣分(见下一章)。
+  </div>
+</section>
+
+<!-- 9. 评分公式 -->
+<section id="s9">
+  <h2><span class="num">9</span>评分公式:每一项含义拆解</h2>
+  <p class="lead">三类冲突扣分 + 两个端口比加分,合起来满分 100。</p>
+
+  <div class="formula big">
+<span class="const">Score</span> = <span class="const">20</span>
+   <span class="neg">−</span> (<span class="neg">12·C_inphsc</span> + <span class="neg">5·C_btphsc</span> + <span class="neg">3·C_bttskc</span>) / <span class="const">总流数</span>
+   <span class="pos">+</span> <span class="pos">40 / Maxsingle_r</span>
+   <span class="pos">+</span> <span class="pos">40 / Maxmulti_r</span>
+  </div>
+
+  <h3>逐项解释</h3>
+  <table>
+    <tr>
+      <th>项</th>
+      <th>取值范围</th>
+      <th>含义</th>
+    </tr>
+    <tr>
+      <td><code class="const">20</code> 常数项</td>
+      <td>= 20</td>
+      <td>无条件基础分,送的</td>
+    </tr>
+    <tr>
+      <td class="bad"><code>− 12·C_inphsc / N</code></td>
+      <td>≤ 0</td>
+      <td>Phase 内冲突惩罚,N 是总流数;每条 Phase 内冲突扣 12/N</td>
+    </tr>
+    <tr>
+      <td class="warn"><code>− 5·C_btphsc / N</code></td>
+      <td>≤ 0</td>
+      <td>Phase 间冲突惩罚;每条 Phase 间冲突扣 5/N</td>
+    </tr>
+    <tr>
+      <td style="color:var(--accent-2)"><code>− 3·C_bttskc / N</code></td>
+      <td>≤ 0</td>
+      <td>Job 间冲突惩罚;每条 Job 间冲突扣 3/N</td>
+    </tr>
+    <tr>
+      <td class="good"><code>+ 40 / Maxsingle_r</code></td>
+      <td>(0, 40]</td>
+      <td>单 Job 端口均衡奖励,Maxsingle=1 时给满 40</td>
+    </tr>
+    <tr>
+      <td class="good"><code>+ 40 / Maxmulti_r</code></td>
+      <td>(0, 40]</td>
+      <td>全局端口均衡奖励,Maxmulti=1 时给满 40</td>
+    </tr>
+  </table>
+
+  <div class="ann">
+    <span class="lbl">坑</span>题面 PDF OCR 显示像"<code>−5·B − 3·C</code>",但从 Example 2 Output1 反算 <code>20 − 8·3/12 + 40/1 + 40/2 = 78</code> 可知<strong>三项都是惩罚(分子前都是减号),且 20 不参与除法</strong>。
+  </div>
+
+  <h3>满分长什么样?</h3>
+  <ul>
+    <li>三类冲突全为 0,惩罚项 = 0</li>
+    <li>Maxsingle = Maxmulti = 1.0 → 加分 40 + 40</li>
+    <li><code>20 + 0 + 40 + 40 = <strong class="good">100</strong></code> ✓</li>
+  </ul>
+
+  <h3>各项最坏情况</h3>
+  <ul>
+    <li>三类冲突最多让前面变成 <code>20 − (12·N)/N = 20 − 12 = 8</code>(理论极限,几乎不会发生)</li>
+    <li>端口比通常上限 <code>~r·总流数/总端口数</code>;比如 Maxmulti = 4,加分项变成 <code>40/4 = 10</code></li>
+  </ul>
+
+  <h3>实时计算器:试一试</h3>
+  <p class="muted" style="font-size:14px;">改下面 6 个数字,看总分怎么变。默认值 = Example 2 Output 1 → 78 分。</p>
+  <div class="score-calc">
+    <div class="sc-row">
+      <label>C_inphsc <span class="muted" style="font-size:12px;">Phase 内</span></label>
+      <input type="number" id="scIn" value="0" min="0">
+      <label>C_btphsc <span class="muted" style="font-size:12px;">Phase 间</span></label>
+      <input type="number" id="scBt" value="0" min="0">
+      <label>C_bttskc <span class="muted" style="font-size:12px;">Job 间</span></label>
+      <input type="number" id="scTask" value="8" min="0">
+    </div>
+    <div class="sc-row">
+      <label>总流数 N</label>
+      <input type="number" id="scN" value="12" min="1">
+      <label>Maxsingle_r</label>
+      <input type="number" id="scMs" value="1.0" min="1" step="0.1">
+      <label>Maxmulti_r</label>
+      <input type="number" id="scMm" value="2.0" min="1" step="0.1">
+    </div>
+    <div class="sc-out" id="scOut"></div>
+  </div>
+  <style>
+    .score-calc { background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin: 12px 0; }
+    .sc-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+    .sc-row label { color: var(--muted); font-size: 13px; min-width: 120px; }
+    .sc-row input { width: 80px; padding: 6px 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; color: var(--text); font-family: "JetBrains Mono", monospace; font-size: 14px; }
+    .sc-row input:focus { outline: none; border-color: var(--accent); }
+    .sc-out { margin-top: 12px; padding: 12px 14px; background: rgba(110,231,255,0.08); border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; font-family: "JetBrains Mono", monospace; font-size: 14px; line-height: 1.9; }
+    .sc-out .total { font-size: 22px; font-weight: 700; color: var(--accent); }
+    @media (max-width: 600px) { .sc-row label { min-width: 100%; } }
+  </style>
+</section>
+
+<!-- 10. 反比例曲线 -->
+<section id="s10">
+  <h2><span class="num">10</span>反比例曲线:1.0 → 1.5 比 1.5 → 2.0 更要命</h2>
+  <p class="lead">为什么算法工程师对端口比格外敏感?因为 40/x 是反比例函数,边际收益不均匀。</p>
+
+  <p>评分里 <code>40 / Maxsingle</code> 和 <code>40 / Maxmulti</code> 都是反比例函数。看下面这个曲线就懂了:</p>
+
+  <div class="curve-plot">
+    <svg viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg">
+      <!-- axes -->
+      <g stroke="#283354" stroke-width="1">
+        <line x1="60" y1="320" x2="570" y2="320"/>
+        <line x1="60" y1="40" x2="60" y2="320"/>
+      </g>
+      <!-- gridlines -->
+      <g stroke="#1d2748" stroke-width="0.5" stroke-dasharray="3 3">
+        <line x1="60" y1="80" x2="570" y2="80"/>
+        <line x1="60" y1="160" x2="570" y2="160"/>
+        <line x1="60" y1="240" x2="570" y2="240"/>
+        <line x1="170" y1="40" x2="170" y2="320"/>
+        <line x1="280" y1="40" x2="280" y2="320"/>
+        <line x1="390" y1="40" x2="390" y2="320"/>
+        <line x1="500" y1="40" x2="500" y2="320"/>
+      </g>
+
+      <!-- y-axis labels -->
+      <g fill="#9ba8c9" font-size="11" text-anchor="end">
+        <text x="55" y="84">40</text>
+        <text x="55" y="164">30</text>
+        <text x="55" y="244">20</text>
+        <text x="55" y="324">10</text>
+      </g>
+      <!-- x-axis labels -->
+      <g fill="#9ba8c9" font-size="11" text-anchor="middle">
+        <text x="60" y="338">1.0</text>
+        <text x="170" y="338">1.5</text>
+        <text x="280" y="338">2.0</text>
+        <text x="390" y="338">2.5</text>
+        <text x="500" y="338">3.0</text>
+        <text x="555" y="338">3.5</text>
+      </g>
+
+      <!-- title -->
+      <text x="315" y="22" text-anchor="middle" fill="#e5ecff" font-size="14" font-weight="600">y = 40 / x   (端口比 x 对应得分)</text>
+      <text x="315" y="354" text-anchor="middle" fill="#9ba8c9" font-size="11">Maxsingle 或 Maxmulti</text>
+
+      <!-- curve: y = 40/x mapped: x=1.0->60, x=3.5->570; y=40->80, y=10->320 -->
+      <!-- Mapping: pixel_x = 60 + (x-1)*220 ; pixel_y = 320 - (40/x - 0)*8 ; need (40/x)*8 from 320 -->
+      <!-- y=40/x at x=1 -> 40 -> py=320-40*6=320-240... Actually let's use: y_pixel = 320 - (40/x)*((320-80)/40) = 320 - (40/x)*6 -->
+      <!-- x=1: 320-240=80 ✓; x=2: 320-120=200; x=3: 320-80=240; x=4: 320-60=260 -->
+      <path d="M 60 80 Q 100 110 170 145 T 280 200 T 390 233 T 500 254 L 570 262"
+            stroke="#6ee7ff" stroke-width="2.5" fill="none"/>
+
+      <!-- 三个关键里程碑 -->
+      <g>
+        <circle cx="60" cy="80" r="4" fill="#6ee7a3"/>
+        <text x="68" y="76" fill="#6ee7a3" font-size="11">(1.0, 40) 满分</text>
+        <circle cx="170" cy="160" r="4" fill="#f7b955"/>
+        <text x="178" y="156" fill="#f7b955" font-size="11">(1.5, 26.7)</text>
+        <circle cx="280" cy="200" r="4" fill="#ff6e8a"/>
+        <text x="288" y="196" fill="#ff6e8a" font-size="11">(2.0, 20.0)</text>
+      </g>
+
+      <!-- 互动点(由滑块控制) -->
+      <circle id="curveDot" cx="280" cy="200" r="7" fill="#6ee7ff" stroke="#fff" stroke-width="2" opacity="0.95"/>
+    </svg>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;">
+      <span style="color:var(--muted); font-size:13px;">拖一拖看曲线点:</span>
+      <input type="range" id="curveX" min="1.0" max="3.5" step="0.05" value="2.0" style="flex:1; min-width:200px; accent-color: var(--accent);">
+    </div>
+    <div id="curveTip" style="margin-top:8px; padding:8px 12px; background: rgba(110,231,255,0.08); border-left:2px solid var(--accent); border-radius:0 4px 4px 0; font-family:'JetBrains Mono', monospace; font-size:13px; color: var(--text);">
+      x = 2.00,  得分 = 40/x = 20.00,  扣分 = 20.00
+    </div>
+  </div>
+
+  <h3>关键观察</h3>
+  <ul>
+    <li><strong>端口比从 1.0 升到 1.5</strong>:扣 13.3 分(40 → 26.7)</li>
+    <li><strong>端口比从 1.5 升到 2.0</strong>:只扣 6.7 分(26.7 → 20)</li>
+    <li><strong>端口比从 2.0 升到 3.0</strong>:再扣 6.7 分(20 → 13.3)</li>
+  </ul>
+
+  <p><strong>言外之意</strong>:</p>
+  <ol>
+    <li>把已经很好的端口比从 1.0 提升到 1.0 边际收益最大——但也最难,因为已经接近完美</li>
+    <li>同样道理,从 2.0 救回 1.5 比从 3.0 救回 2.5 收益更大</li>
+    <li>算法应该<strong>优先打掉那些 1.0–1.5 区间的端口</strong>(虽然听起来反直觉,因为它们看起来已经"还行")</li>
+  </ol>
+
+  <div class="ann good">
+    <span class="lbl">实战经验</span>仓库的算法用 <code>40/peak²</code> 作为边际导数估计,优先消除那些"端口比刚冒头超过 1"的端口,而不是去救已经爆掉的端口——后者怎么救都救不到 1.0,但前者动一下就能直接拉满。
+  </div>
+</section>
+
+<!-- 11. 算分演示 -->
+<section id="s11">
+  <h2><span class="num">11</span>算分演示:78 分是怎么来的?</h2>
+  <p class="lead">把所有概念拼一起,完整走一遍 Example 2 的 78 分解。</p>
+
+  <h3>题目回顾</h3>
+  <p>Example 2 的网络:<code>n=3 个 Job, l=3 个 Leaf, p=2 端口, r=2</code>,卡 0–11(每 Leaf 4 张)。</p>
+  <p>三个 Job 各 1 Phase 4 条全跨 Leaf 流:</p>
+  <ul>
+    <li>Job 1: <code>(0,4)(4,0)(1,5)(5,1)</code> — Leaf0 ↔ Leaf1</li>
+    <li>Job 2: <code>(2,10)(10,2)(3,11)(11,3)</code> — Leaf0 ↔ Leaf2</li>
+    <li>Job 3: <code>(6,8)(8,6)(7,9)(9,7)</code> — Leaf1 ↔ Leaf2</li>
+  </ul>
+  <p>总流数 N = 12。</p>
+
+  <h3>Output 1(78 分)的端口分配</h3>
+  <p>这是 OJ 题面给的参考解之一。每个 Job 把 <strong>4 条流全部挤到同一个端口</strong>(单看自己 OK,但叠加就翻车):</p>
+  <table>
+    <tr><th>Job</th><th>Leaf 对</th><th>分配</th></tr>
+    <tr><td>Job 1</td><td>L0 ↔ L1</td><td>4 条流全走 <code>port 0</code></td></tr>
+    <tr><td>Job 2</td><td>L0 ↔ L2</td><td>4 条流全走 <code>port 1</code></td></tr>
+    <tr><td>Job 3</td><td>L1 ↔ L2</td><td>4 条流全走 <code>port 1</code></td></tr>
+  </table>
+
+  <div class="ann">
+    <span class="lbl">关键口径</span>端口负载按 <strong>(Leaf, port, 方向)</strong> 三元组分别计——一条 src→dst 流同时占用 (srcLeaf, port, <code>out</code>) 和 (dstLeaf, port, <code>in</code>) 两条记录。后面所有 peak / Maxsingle / Maxmulti / C 都基于这个三元组。
+  </div>
+
+  <h3>Step 1 — 数 Phase 内冲突 C_inphsc</h3>
+  <p>Job 1 的 4 条流全走 port 0,按方向拆开:</p>
+  <ul>
+    <li><code>(L0, p0, out)</code> = 2 条 (<code>0→4, 1→5</code> 从 L0 出去)</li>
+    <li><code>(L0, p0, in)</code>  = 2 条 (<code>4→0, 5→1</code> 进入 L0)</li>
+    <li><code>(L1, p0, out)</code> = 2;<code>(L1, p0, in)</code> = 2</li>
+  </ul>
+  <p>每个方向最多 2 条 = r,刚好不超 → <strong>C_inphsc = 0</strong>。Job 2/3 同理。</p>
+
+  <h3>Step 2 — 数 Phase 间冲突 C_btphsc</h3>
+  <p>每 Job 只有 1 个 Phase,不存在跨 Phase → <strong>C_btphsc = 0</strong></p>
+
+  <h3>Step 3 — 数 Job 间冲突 C_bttskc</h3>
+  <p>对每个 (Leaf, port, 方向),把所有 Job 的 max-Phase 流数累加:</p>
+  <table>
+    <tr><th>(Leaf, port, 方向)</th><th class="center">Job 1</th><th class="center">Job 2</th><th class="center">Job 3</th><th class="center">合计</th><th class="center">超 r=2?</th></tr>
+    <tr><td><code>(L0, p0, out/in)</code></td><td class="center">2</td><td class="center">0</td><td class="center">0</td><td class="center">2</td><td class="center good">✓ 不超</td></tr>
+    <tr><td><code>(L1, p0, out/in)</code></td><td class="center">2</td><td class="center">0</td><td class="center">0</td><td class="center">2</td><td class="center good">✓ 不超</td></tr>
+    <tr><td><code>(L0, p1, out/in)</code></td><td class="center">0</td><td class="center">2</td><td class="center">0</td><td class="center">2</td><td class="center good">✓ 不超</td></tr>
+    <tr><td><code>(L1, p1, out/in)</code></td><td class="center">0</td><td class="center">0</td><td class="center">2</td><td class="center">2</td><td class="center good">✓ 不超</td></tr>
+    <tr><td><code>(L2, p1, out)</code></td><td class="center">0</td><td class="center">2</td><td class="center">2</td><td class="center">4</td><td class="center bad">✗ 超 2</td></tr>
+    <tr><td><code>(L2, p1, in)</code></td><td class="center">0</td><td class="center">2</td><td class="center">2</td><td class="center">4</td><td class="center bad">✗ 超 2</td></tr>
+  </table>
+  <div class="ann bad">
+    <span class="lbl">官方口径</span>C_bttskc 不是"超出量",而是 <strong>"命中超载端口的流数"</strong>。<br>
+    Job 2 的 4 条流都途径 <code>(L2, p1, out/in)</code>,被 Job 3 累加导致总数 4 > r=2 → Job 2 的 4 条全部计入 C_bttskc。Job 3 同理 4 条全部计入。
+  </div>
+  <p><strong>C_bttskc = Job 2 命中 4 + Job 3 命中 4 = 8</strong>(Job 1 没和任何 Job 撞端口,4 条流都不计入)</p>
+
+  <h3>Step 4 — 求 Maxsingle</h3>
+  <p>每个 Job 单看,所有 (Leaf, port, 方向) 上流数最多是 2 → Maxsingle_c = 2,除以 r=2 → <strong>Maxsingle_r = 1.0</strong></p>
+
+  <h3>Step 5 — 求 Maxmulti</h3>
+  <p>叠加后 <code>(L2, p1, out)</code> 和 <code>(L2, p1, in)</code> 各有 4 条流,Maxmulti_c = 4 → <strong>Maxmulti_r = 4 / 2 = 2.0</strong></p>
+
+  <h3>Step 6 — 组装总分</h3>
+  <div class="breakdown">
+    <div class="row"><span>基础分</span><span class="good">+ 20</span></div>
+    <div class="row"><span>Phase 内惩罚: 12 × 0 / 12</span><span>− 0</span></div>
+    <div class="row"><span>Phase 间惩罚: 5 × 0 / 12</span><span>− 0</span></div>
+    <div class="row"><span class="bad">Job 间惩罚: 3 × 8 / 12</span><span class="bad">− 2.0</span></div>
+    <div class="row"><span class="good">单 Job 端口比: 40 / 1.0</span><span class="good">+ 40.0</span></div>
+    <div class="row"><span class="warn">全局端口比: 40 / 2.0</span><span class="warn">+ 20.0</span></div>
+    <div class="row total"><span>合计</span><span>78.0 分</span></div>
+  </div>
+
+  <p class="muted">如果把 Maxmulti 从 2.0 救回 1.0,这一项就从 +20 变成 +40,加上消除 Job 间冲突,刚好就是满分 100。这就是 Output 3 的故事。</p>
+</section>
+
+<!-- 12. Example 2 三种 -->
+<section id="s12">
+  <h2><span class="num">12</span>同一题,不同算法的差距(Example 2)</h2>
+  <p class="lead">点切换看三种端口分配如何拿到 78、83.7、100 三种分数。</p>
+
+  <p>三种解法的差异完全不在"会不会做",而在"能不能做出全局协调":</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="78">Output 1 → 78 分</button>
+    <button class="tab-btn" data-tab="83">Output 2 → 83.7 分</button>
+    <button class="tab-btn" data-tab="100">Output 3 → 100 分</button>
+  </div>
+
+  <div class="tab-panel active" id="panel-78">
+    <h3>所有流都挤同一端口(蠢办法)</h3>
+    <p>每个 Job 把它的 4 条跨 Leaf 流"对称地"分到 port 0、port 1。<strong>各自看是平衡的</strong>(Maxsingle=1.0),但叠加后某些 (Leaf, port) 上挂了 4 条流(2+2),Maxmulti = 4/2 = 2.0。</p>
+    <div class="formula">
+Score = 20 − 3·8/12 + 40/1.0 + 40/2.0
+      = 20 − 2 + 40 + 20
+      = <span class="bad">78.0</span>
+    </div>
+    <p class="muted">直觉错误:每个 Job 独立看都"完美",但合起来烂。这就是为什么不能单 Job 贪心。</p>
+  </div>
+
+  <div class="tab-panel" id="panel-83">
+    <h3>稍微错开(中等)</h3>
+    <p>三个 Job 之间有部分错开,Maxmulti 降到 1.5,但局部冲突还多了一些。</p>
+    <div class="formula">
+Score = 20 − 3·12/12 + 40/1.0 + 40/1.5
+      = 20 − 3 + 40 + 26.67
+      = <span class="warn">83.67</span>
+    </div>
+    <p class="muted">趋势对,但没做到极致。</p>
+  </div>
+
+  <div class="tab-panel" id="panel-100">
+    <h3>完美错开(满分)</h3>
+    <p>三个 Job 用同一种"约定":源在 Leaf 偶数序号的卡 → port 0,奇数序号 → port 1。这样每个 Leaf 的 port 0、port 1 在 3 个 Job 叠加之后,负载都正好 = r。</p>
+    <table>
+      <tr><th>Job</th><th class="center">流→port</th></tr>
+      <tr><td>Job 1 (0↔4, 1↔5)</td><td class="center">0↔4 用 port 0,1↔5 用 port 1</td></tr>
+      <tr><td>Job 2 (2↔10, 3↔11)</td><td class="center">2↔10 用 port 0,3↔11 用 port 1</td></tr>
+      <tr><td>Job 3 (6↔8, 7↔9)</td><td class="center">6↔8 用 port 0,7↔9 用 port 1</td></tr>
+    </table>
+    <div class="formula">
+每个 Leaf 的 port 0:2 条流(满 r=2)→ 比值 1.0
+每个 Leaf 的 port 1:2 条流(满 r=2)→ 比值 1.0
+
+Score = 20 − 0 + 40/1.0 + 40/1.0 = <span class="good">100.0</span>
+    </div>
+    <p class="muted">本质是"全局协调"——每个 Job 单独决策时无所谓,但合起来能不能不打架,取决于算法是否提前约定了某种全局模式。这就是这道题难的地方:你看不到后面的 Job,但要做出能与未来兼容的决策。</p>
+  </div>
+</section>
+
+<!-- 13. FAQ -->
+<section id="s13">
+  <h2><span class="num">13</span>FAQ:你可能想问的 N 个问题</h2>
+  <p class="lead">各种容易误解、容易踩坑的细节。</p>
+
+  <details>
+    <summary>Q1: 为什么同 Leaf 内通信不占端口?</summary>
+    <p>Leaf 交换机本身有"环回交换能力"——卡 0 给卡 1 发数据,Leaf 内部直接转发,根本不用上 Spine。所以这种流标记 <code>port = -1</code>,不计入任何端口冲突。</p>
+  </details>
+
+  <details>
+    <summary>Q2: 为什么端口冲突要除以 r?r 是什么?</summary>
+    <p><code>r</code> 是上下行带宽比。每个 Leaf 的下行总带宽是 <code>p × r</code> 个单位(p 张卡每张 r),上行总带宽是 <code>p</code> 个端口每个 r 单位。即一个端口能容纳 r 条并发流而不冲突。<br>题面 r ≤ 4,意味着一个端口最多扛 4 条流。</p>
+  </details>
+
+  <details>
+    <summary>Q3: 一条流被分到 port 后,意思是什么?</summary>
+    <p>port 编号代表选择第 k 个 Spine。计分时同时占用源 Leaf 的<strong>出方向</strong> <code>(srcLeaf, port, out)</code> 和目的 Leaf 的<strong>入方向</strong> <code>(dstLeaf, port, in)</code> 两条记录。换 port 等于走另一台 Spine 转发。</p>
+  </details>
+
+  <details>
+    <summary>Q4: 为什么 Phase 内冲突权重最高(×12)?</summary>
+    <p>因为 Phase 内冲突是"实时"的——同一时刻多个流抢同一个端口,会真的造成丢包/重传。其他冲突或多或少是"时间错位的潜在影响",代价较小。</p>
+  </details>
+
+  <details>
+    <summary>Q5: 在线问题?那我能不能存所有 Job 一次决定?</summary>
+    <p>不能。题目协议是<strong>读完 Job1 输入 → 立即输出 Job1 的端口分配 → 再读 Job2</strong>。如果你不输出,程序就 hang 在那里。所以必须做"在线决策":此刻不知未来,但要做出对未来友好的选择。</p>
+  </details>
+
+  <details>
+    <summary>Q6: 5 秒是 wall clock 还是 CPU?平台是什么硬件?</summary>
+    <p>5 秒是题面规定的算法时间上限(wall);OJ 系统不杀进程的容忍上限是 100 秒(包含编译)。机器规格 <strong>1 Core CPU + 2GB 内存</strong>——单核,所以多线程没用、只能拼算法。</p>
+  </details>
+
+  <details>
+    <summary>Q7: Maxsingle 和 Maxmulti 都是 max,那如果某个端口爆了,Maxmulti=4,直接给我扣 30 分?</summary>
+    <p>对,而且 Maxmulti 通常比 Maxsingle 大,因为它是跨 Job 累加。算法的目标之一就是<strong>压低这个全局峰值</strong>,而不是只优化单 Job 视角。</p>
+  </details>
+
+  <details>
+    <summary>Q8: 总流数 N 是不是只算跨 Leaf 流?</summary>
+    <p>不,N 是<strong>所有流</strong>(包括 port=-1 的内部流)。这是分母,所以 N 越大,每条冲突摊薄后的扣分越小。这意味着 N 大的题"容错率"更高。</p>
+  </details>
+
+  <details>
+    <summary>Q9: 题目允许重复流吗?(同一 Job 出现 (A,B) 两次)</summary>
+    <p>同一 Job 内允许跨 Phase 有相同 (src, dst);输出时按 (src, dst) 唯一化(去重)。同一 Phase 内不会有完全重复的 (src, dst) 出现两次。</p>
+  </details>
+
+  <details>
+    <summary>Q10: 算法跑超 5 秒会怎样?</summary>
+    <p>题面 5 秒是 deadline;100 秒是平台杀进程门槛。仓库当前算法实测 max case 单核约 4.6–4.8s,留一点 buffer 让算法在没结束时也能立刻输出当前最佳解。<strong>超时 = 0 分</strong>。</p>
+  </details>
+
+  <details>
+    <summary>Q11: 比值小于 1.0 怎么算?</summary>
+    <p>比值会先 <code>max(1, peak/r)</code> 截断到 1.0,所以 <code>40/x</code> 上限是 40。这意味着"端口很空闲"不给额外奖励,只奖励"刚好填满不超载"。</p>
+  </details>
+
+  <details>
+    <summary>Q12: 不同 Leaf 的同号端口算冲突吗?(Leaf0 的 port0 和 Leaf1 的 port0)</summary>
+    <p>不算。冲突按 <strong>(Leaf, port, 方向)</strong> 三元组分别累计——同 Leaf 同 port 的 out 和 in 还要再分。所以 Leaf0/p0/out 和 Leaf1/p0/out 互不影响,Leaf0/p0/out 和 Leaf0/p0/in 也分别计。</p>
+  </details>
+</section>
+
+<!-- 14. 难点小结 -->
+<section id="s14">
+  <h2><span class="num">14</span>整道题的难点在哪?</h2>
+  <p class="lead">现在回头看,你应该明白这是个「在线决策 + 全局协调」问题。</p>
+
+  <h3>四个核心难点</h3>
+  <ol>
+    <li><strong>在线性</strong>:决定 Job1 的端口时,看不到 Job2、Job3 长什么样。但 Job 间冲突恰恰需要全局协调。</li>
+    <li><strong>规模</strong>:最大 ~1500 万条流要在 5 秒内决策,几乎没时间"试错"。</li>
+    <li><strong>多目标</strong>:同时要降三类冲突 + 同时降两个端口比,这些目标之间会打架。比如想让 Maxmulti 平,可能要牺牲一些 Phase 内对齐。</li>
+    <li><strong>评分公式高度非线性</strong>:<code>40/peak</code> 是反比例函数,从 1.0 → 1.5 是 −13 分,从 1.5 → 2.0 才 −7 分,边际收益不均匀,<strong>不能用线性 cost 函数代替</strong>。</li>
+  </ol>
+
+  <h3>当前进展(2026-05-10)</h3>
+  <ul>
+    <li>仓库当前最佳:<strong>真实分数 35.88</strong>(平台显示 358800000)</li>
+    <li>目标:<strong>真实分数 40.0</strong>(平台显示 400000000)</li>
+    <li>奖项基线:35.0(平台 350000000)</li>
+    <li>截止时间:2026-05-31 18:00</li>
+    <li>已尝试 9 种优化方向(cost 公式、加速、多起点等)都没突破 35.88——这道题真不简单</li>
+  </ul>
+
+  <h3>当前瓶颈</h3>
+  <p>本地 30 runs benchmark 已被证伪——不能预测平台分数。任何"改 cost 公式 / 改 bindCost 速度 / 改 seed 排序 / 改权重"的单点改动都触发同型 trade-off:部分 case 升、部分 case 降,平台综合分数难以稳定提升。剩下可能升分的方向是<strong>结构性算法重写</strong>(LP relaxation / König 边着色等),工程量大但天花板高。</p>
+</section>
+
+<div class="footer">
+  本页是单文件 HTML,无外部依赖,可直接在浏览器打开。<br>
+  详细算法路线见仓库 <code>CLAUDE.md</code>。
+</div>
+
+</div>
+
+<script>
+  // 算力卡编号计算
+  const calcP = document.getElementById('calcP');
+  const calcR = document.getElementById('calcR');
+  const calcCard = document.getElementById('calcCard');
+  const calcOut = document.getElementById('calcOut');
+  function updateCalc() {
+    const p = parseInt(calcP.value) || 1;
+    const r = parseInt(calcR.value) || 1;
+    const c = parseInt(calcCard.value) || 0;
+    const cap = p * r;
+    if (cap === 0) { calcOut.textContent = '参数无效'; return; }
+    const leaf = Math.floor(c / cap);
+    const slot = c % cap;
+    calcOut.textContent = `Leaf ${leaf} 的第 ${slot} 个槽位`;
+  }
+  [calcP, calcR, calcCard].forEach(el => el.addEventListener('input', updateCalc));
+  updateCalc();
+
+  // Tab 切换
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${tab}`));
+    });
+  });
+
+  // 评分公式实时计算器
+  const scIds = ['scIn', 'scBt', 'scTask', 'scN', 'scMs', 'scMm'];
+  function updateScore() {
+    const Ci = +document.getElementById('scIn').value || 0;
+    const Cb = +document.getElementById('scBt').value || 0;
+    const Ct = +document.getElementById('scTask').value || 0;
+    const N  = Math.max(1, +document.getElementById('scN').value || 1);
+    const Ms = Math.max(1, +document.getElementById('scMs').value || 1);
+    const Mm = Math.max(1, +document.getElementById('scMm').value || 1);
+    const penalty = (12*Ci + 5*Cb + 3*Ct) / N;
+    const term1 = 20 - penalty;
+    const term2 = 40 / Ms;
+    const term3 = 40 / Mm;
+    const total = term1 + term2 + term3;
+    const fmt = x => x.toFixed(2);
+    document.getElementById('scOut').innerHTML =
+      `20 − (12·${Ci} + 5·${Cb} + 3·${Ct}) / ${N} = <b>${fmt(term1)}</b><br>` +
+      `40 / Maxsingle_r(${Ms}) = <b>${fmt(term2)}</b><br>` +
+      `40 / Maxmulti_r(${Mm}) = <b>${fmt(term3)}</b><br>` +
+      `合计 <span class="total">${fmt(total)} 分</span>`;
+  }
+  scIds.forEach(id => document.getElementById(id).addEventListener('input', updateScore));
+  updateScore();
+
+  // 反比例曲线滑块
+  const sliderX = document.getElementById('curveX');
+  if (sliderX) {
+    const tip = document.getElementById('curveTip');
+    const dot = document.getElementById('curveDot');
+    function updateCurve() {
+      const x = +sliderX.value;
+      const y = 40 / x;
+      // viewBox 映射:x∈[1.0,3.5] → cx∈[60,570];y∈[10,40] → cy∈[320,80](40px=80, 每减 10 加 80)
+      const cx = 60 + (x - 1.0) * (510 / 2.5);
+      const cy = 320 - (y - 10) * (240 / 30);
+      dot.setAttribute('cx', cx);
+      dot.setAttribute('cy', cy);
+      tip.textContent = `x = ${x.toFixed(2)},  得分 = 40/x = ${y.toFixed(2)},  扣分 = ${(40 - y).toFixed(2)}`;
+    }
+    sliderX.addEventListener('input', updateCurve);
+    updateCurve();
+  }
+</script>
+</body>
+</html>

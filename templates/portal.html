@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>算法可视化 · Portal</title>
+<style>
+  :root {
+    --bg: #0b1020;
+    --bg-2: #121a33;
+    --card: #18223f;
+    --card-hover: #1f2a4d;
+    --line: #283354;
+    --text: #e5ecff;
+    --muted: #9ba8c9;
+    --accent: #6ee7ff;
+    --accent-2: #b794f6;
+    --good: #6ee7a3;
+    --warn: #f7b955;
+    --bad: #ff6e8a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); min-height: 100vh; }
+  body {
+    font-family: -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    line-height: 1.7;
+    font-size: 16px;
+    background: radial-gradient(ellipse at top, #1a2548 0%, #0b1020 60%);
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 60px 24px 80px; }
+
+  /* Header */
+  header { text-align: center; margin-bottom: 56px; }
+  header .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: rgba(110, 231, 255, 0.12);
+    color: var(--accent);
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    margin-bottom: 18px;
+  }
+  header h1 {
+    margin: 0 0 14px;
+    font-size: 48px;
+    line-height: 1.1;
+    background: linear-gradient(120deg, #6ee7ff, #b794f6 60%, #ff8fb3);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: -1px;
+  }
+  header p { margin: 0; font-size: 18px; color: var(--muted); max-width: 640px; margin: 0 auto; }
+
+  /* Stats bar */
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    margin: 30px 0 0;
+    flex-wrap: wrap;
+  }
+  .stats .stat { text-align: center; }
+  .stats .stat .num { font-size: 28px; font-weight: 700; color: var(--accent); font-family: "JetBrains Mono", monospace; }
+  .stats .stat .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+  /* Section heading */
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 48px 0 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .section-head h2 { margin: 0; font-size: 22px; color: var(--text); }
+  .section-head .meta { color: var(--muted); font-size: 14px; }
+
+  /* Filter chips */
+  .filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .chip {
+    padding: 6px 14px;
+    background: var(--bg-2);
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--text); }
+  .chip.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #0b1020;
+    border-color: transparent;
+    font-weight: 600;
+  }
+
+  /* Cards grid */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 60%, rgba(110, 231, 255, 0.06));
+    pointer-events: none;
+  }
+  .card:hover {
+    background: var(--card-hover);
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(110, 231, 255, 0.12);
+  }
+  .card .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .card h3 { margin: 0; font-size: 19px; color: var(--text); flex: 1; }
+  .card .status {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+  .status-good { background: rgba(110, 231, 163, 0.15); color: var(--good); }
+  .status-warn { background: rgba(247, 185, 85, 0.15); color: var(--warn); }
+  .status-bad  { background: rgba(255, 110, 138, 0.15); color: var(--bad); }
+  .status-mute { background: rgba(155, 168, 201, 0.12); color: var(--muted); }
+
+  .card .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 14px;
+    font-family: "JetBrains Mono", monospace;
+  }
+  .card .desc {
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.65;
+    margin-bottom: 16px;
+    flex: 1;
+  }
+  .card .tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .card .tag {
+    padding: 2px 9px;
+    background: rgba(183, 148, 246, 0.12);
+    color: var(--accent-2);
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: "JetBrains Mono", monospace;
+  }
+  .card .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .card .arrow {
+    color: var(--accent);
+    font-size: 18px;
+    transition: transform 0.25s;
+  }
+  .card:hover .arrow { transform: translateX(4px); }
+
+  /* Empty placeholder card */
+  .card.placeholder {
+    border-style: dashed;
+    background: transparent;
+    cursor: default;
+    opacity: 0.5;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 240px;
+  }
+  .card.placeholder:hover { transform: none; box-shadow: none; border-color: var(--line); }
+  .card.placeholder .icon { font-size: 32px; margin-bottom: 8px; opacity: 0.6; }
+  .card.placeholder p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  /* Footer */
+  footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  footer code { background: rgba(110, 231, 255, 0.10); padding: 1px 6px; border-radius: 4px; color: var(--accent); font-family: "JetBrains Mono", monospace; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 36px; }
+    .stats { gap: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="badge">ALGORITHM VISUALIZATION PORTAL</span>
+  <h1>算法可视化</h1>
+  <p>把一道竞赛题/算法概念从「看不懂」讲到「会算分」。每个项目都是单文件交互式 HTML,深色主题,SVG 图示,完整算分演示。</p>
+  <div class="stats">
+    <div class="stat"><div class="num" id="statTotal">—</div><div class="label">已上线</div></div>
+    <div class="stat"><div class="num" id="statTags">—</div><div class="label">主题分类</div></div>
+    <div class="stat"><div class="num">∞</div><div class="label">扩展中</div></div>
+  </div>
+</header>
+
+<div class="section-head">
+  <h2>所有算法</h2>
+  <span class="meta" id="filterMeta"></span>
+</div>
+
+<div class="filters" id="filters"></div>
+
+<div class="cards" id="cards"></div>
+
+<footer>
+  本 portal 由 <code>algo-page-viz</code> skill 自动生成。<br>
+  添加新算法:在 <code>algorithms.json</code> 数组里加一项,部署即可。
+</footer>
+
+</div>
+
+<script>
+  const ALGORITHMS = [
+    {
+      id: "nslb",
+      title: "AI 训练集群网络均衡分担",
+      subtitle: "华为算法挑战赛 S37 · NSLB",
+      desc: "几千张 GPU 互发数据时,如何给每条流分配上行端口,让全网最拥堵的链路尽量轻。讲透 Leaf-Spine 拓扑、三类冲突、反比例评分曲线,以及 78 分到 100 分的差距怎么来的。",
+      tags: ["在线决策", "网络拓扑", "评分公式", "竞赛"],
+      href: "/nslb/",
+      status: "已上线",
+      statusClass: "status-good",
+      date: "2026-05-10",
+      chapters: 14
+    },
+    // 未来加新算法在这里追加,字段同上
+  ];
+
+  // 渲染统计
+  document.getElementById('statTotal').textContent = ALGORITHMS.length;
+  const allTags = [...new Set(ALGORITHMS.flatMap(a => a.tags))];
+  document.getElementById('statTags').textContent = allTags.length;
+
+  // 渲染过滤 chip
+  const filtersEl = document.getElementById('filters');
+  const filterMeta = document.getElementById('filterMeta');
+  let activeFilter = 'all';
+
+  function renderFilters() {
+    const filters = ['all', ...allTags];
+    filtersEl.innerHTML = filters.map(t =>
+      `<button class="chip ${t === activeFilter ? 'active' : ''}" data-tag="${t}">${t === 'all' ? '全部' : t}</button>`
+    ).join('');
+    filtersEl.querySelectorAll('.chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeFilter = btn.dataset.tag;
+        renderFilters();
+        renderCards();
+      });
+    });
+  }
+
+  function renderCards() {
+    const cardsEl = document.getElementById('cards');
+    const filtered = activeFilter === 'all'
+      ? ALGORITHMS
+      : ALGORITHMS.filter(a => a.tags.includes(activeFilter));
+
+    filterMeta.textContent = `${filtered.length} / ${ALGORITHMS.length} 项`;
+
+    cardsEl.innerHTML = filtered.map(a => `
+      <a class="card" href="${a.href}">
+        <div class="top">
+          <h3>${a.title}</h3>
+          <span class="status ${a.statusClass}">${a.status}</span>
+        </div>
+        <div class="subtitle">${a.subtitle}</div>
+        <div class="desc">${a.desc}</div>
+        <div class="tags">
+          ${a.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+        </div>
+        <div class="footer">
+          <span>${a.date} · ${a.chapters} 章</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+    `).join('');
+
+    // 占位卡片(when 1-2 cards 时显得太空)
+    if (filtered.length < 3) {
+      cardsEl.innerHTML += `
+        <div class="card placeholder">
+          <div>
+            <div class="icon">+</div>
+            <p>更多算法<br>陆续加入中</p>
+          </div>
+        </div>`;
+    }
+  }
+
+  renderFilters();
+  renderCards();
+</script>
+</body>
+</html>

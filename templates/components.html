@@ -1,0 +1,381 @@
+<!--
+algo-page-viz · 组件样例
+====================
+本文件不是完整网页,而是各类 UI 组件的"独立片段",方便填充骨架时拷贝。
+所有组件假设 :root 配色变量已定义(见 SKILL.md "配色变量")。
+-->
+
+<!-- ============== 1. Hero(首屏) ============== -->
+<div class="hero">
+  <span class="tag">类别 · 副标题</span>
+  <h1>主标题(渐变文字)</h1>
+  <p>一句话总结:目标读者听完这句话就知道这页是讲什么的。</p>
+</div>
+<style>
+.hero { padding: 56px 28px 44px; border-radius: 20px;
+  background: linear-gradient(135deg, #1a2548 0%, #2a1748 100%);
+  border: 1px solid var(--line); margin-bottom: 36px; }
+.hero .tag { display: inline-block; padding: 4px 12px; border-radius: 999px;
+  background: rgba(110, 231, 255, 0.12); color: var(--accent);
+  font-size: 13px; letter-spacing: 0.5px; margin-bottom: 16px; }
+.hero h1 { margin: 0 0 12px; font-size: 36px; line-height: 1.25;
+  background: linear-gradient(120deg, #6ee7ff, #b794f6);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p { margin: 0; font-size: 18px; color: var(--muted); }
+</style>
+
+
+<!-- ============== 2. 双列目录 ============== -->
+<div class="toc">
+  <h3>目录</h3>
+  <ol>
+    <li><a href="#s1">第 1 章标题</a></li>
+    <li><a href="#s2">第 2 章标题</a></li>
+    <!-- ... -->
+  </ol>
+</div>
+<style>
+.toc { background: var(--card); border: 1px solid var(--line);
+  border-radius: 12px; padding: 16px 24px; margin: 0 0 32px; font-size: 14px; }
+.toc h3 { margin: 4px 0 8px; color: var(--accent); font-size: 14px; }
+.toc ol { margin: 0; padding-left: 20px; column-count: 2; column-gap: 28px; }
+.toc li { margin: 3px 0; }
+.toc a { color: var(--text); text-decoration: none; }
+.toc a:hover { color: var(--accent); }
+@media (max-width: 600px) { .toc ol { column-count: 1; } }
+</style>
+
+
+<!-- ============== 3. 章节 + 序号 badge ============== -->
+<section id="sN">
+  <h2><span class="num">N</span>章节标题</h2>
+  <p class="lead">一句导语(灰色,小字)。</p>
+  <p>正文内容...</p>
+</section>
+<style>
+section { margin: 44px 0; padding: 28px; background: var(--card);
+  border: 1px solid var(--line); border-radius: 16px;
+  scroll-margin-top: 20px; }
+section h2 { margin: 0 0 8px; font-size: 24px;
+  display: flex; align-items: center; gap: 12px; }
+section h2 .num { display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #0b1020; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+section .lead { color: var(--muted); margin: 0 0 18px; font-size: 15px; }
+</style>
+
+
+<!-- ============== 4. Formula 块(公式) ============== -->
+<div class="formula">
+Score = 20 − (12·A + 5·B + 3·C) / N + 40/x + 40/y
+</div>
+
+<div class="formula big">
+  card_id = p × r × i + j
+  <div style="color:var(--muted); font-size:13px; margin-top:6px;">i = Leaf 编号</div>
+</div>
+<style>
+.formula { background: #0b1326; border-left: 3px solid var(--accent);
+  padding: 14px 18px; margin: 14px 0;
+  font-family: "JetBrains Mono", monospace; font-size: 15px; line-height: 1.9;
+  border-radius: 0 8px 8px 0; overflow-x: auto; }
+.formula.big { font-size: 17px; padding: 22px; text-align: center; }
+.formula .neg { color: var(--bad); }
+.formula .pos { color: var(--good); }
+.formula .const { color: var(--warn); }
+</style>
+
+
+<!-- ============== 5. 标注块 ann(易错点/经验/坑) ============== -->
+<div class="ann">
+  <span class="lbl">易错</span>这里说一个具体的坑。
+</div>
+<div class="ann good">
+  <span class="lbl">经验</span>这里说一条已验证的最佳实践。
+</div>
+<div class="ann bad">
+  <span class="lbl">严重</span>不注意会导致整体失败的坑。
+</div>
+<style>
+.ann { background: rgba(247, 185, 85, 0.12); border-left: 3px solid var(--warn);
+  padding: 10px 14px; margin: 12px 0; border-radius: 0 8px 8px 0; font-size: 14px; }
+.ann.good { background: rgba(110, 231, 163, 0.12); border-left-color: var(--good); }
+.ann.bad { background: rgba(255, 110, 138, 0.10); border-left-color: var(--bad); }
+.ann .lbl { font-weight: 600; margin-right: 6px; color: var(--warn); }
+.ann.good .lbl { color: var(--good); }
+.ann.bad .lbl { color: var(--bad); }
+</style>
+
+
+<!-- ============== 6. Mini 卡片网格 ============== -->
+<div class="grid cols-3">
+  <div class="mini">
+    <div class="label">指标名</div>
+    <div class="val">42</div>
+    <p class="muted">补充说明...</p>
+  </div>
+  <!-- 重复 -->
+</div>
+<style>
+.grid { display: grid; gap: 14px; }
+.grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 720px) { .grid.cols-2, .grid.cols-3, .grid.cols-4 { grid-template-columns: 1fr; } }
+.mini { background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 14px 16px; }
+.mini .label { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
+.mini .val { font-size: 22px; font-weight: 700; }
+</style>
+
+
+<!-- ============== 7. 评分明细 breakdown ============== -->
+<div class="breakdown">
+  <div class="row"><span>基础分</span><span class="good">+ 20</span></div>
+  <div class="row"><span>惩罚 1</span><span class="bad">− 2.0</span></div>
+  <div class="row"><span>奖励 1</span><span class="good">+ 40.0</span></div>
+  <div class="row total"><span>合计</span><span>78.0 分</span></div>
+</div>
+<style>
+.breakdown { background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 16px; margin: 12px 0; }
+.breakdown .row { display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 0; border-bottom: 1px dashed var(--line);
+  font-family: "JetBrains Mono", monospace; font-size: 14px; }
+.breakdown .row:last-child { border-bottom: 0; }
+.breakdown .row.total { border-top: 2px solid var(--accent); border-bottom: 0;
+  margin-top: 6px; padding-top: 10px; font-size: 17px;
+  font-weight: 700; color: var(--accent); }
+</style>
+
+
+<!-- ============== 8. Tab 切换(多解法对比) ============== -->
+<div class="tabs">
+  <button class="tab-btn active" data-tab="A">解法 A</button>
+  <button class="tab-btn" data-tab="B">解法 B</button>
+</div>
+<div class="tab-panel active" id="panel-A">解法 A 内容</div>
+<div class="tab-panel" id="panel-B">解法 B 内容</div>
+<script>
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const t = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${t}`));
+  });
+});
+</script>
+<style>
+.tabs { display: flex; gap: 8px; margin: 16px 0 12px; flex-wrap: wrap; }
+.tab-btn { padding: 8px 16px; background: var(--bg-2); color: var(--text);
+  border: 1px solid var(--line); border-radius: 8px; cursor: pointer;
+  font-family: inherit; font-size: 14px; transition: all 0.2s; }
+.tab-btn:hover { border-color: var(--accent); }
+.tab-btn.active { background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #0b1020; border-color: transparent; font-weight: 600; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+</style>
+
+
+<!-- ============== 9. FAQ 折叠(details/summary) ============== -->
+<details>
+  <summary>Q: 一个常见问题?</summary>
+  <p>A: 答案,可以多段、可以有 <code>code</code> 和列表。</p>
+</details>
+<style>
+details { background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 8px; padding: 10px 14px; margin: 8px 0; }
+details summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+details[open] summary { margin-bottom: 8px; }
+</style>
+
+
+<!-- ============== 10. 交互式计算器 ============== -->
+<div class="calc-row">
+  <label>输入 a =</label><input type="number" id="inA" value="2">
+  <label>输入 b =</label><input type="number" id="inB" value="3">
+  <span>→ <span class="out" id="outResult">?</span></span>
+</div>
+<script>
+function update() {
+  const a = parseFloat(document.getElementById('inA').value) || 0;
+  const b = parseFloat(document.getElementById('inB').value) || 0;
+  document.getElementById('outResult').textContent = `a + b = ${a + b}`;
+}
+['inA', 'inB'].forEach(id => document.getElementById(id).addEventListener('input', update));
+update();
+</script>
+<style>
+.calc-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 16px 0; }
+.calc-row label { color: var(--muted); font-size: 14px; }
+.calc-row input { width: 70px; padding: 6px 10px;
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 6px;
+  color: var(--text); font-family: inherit; font-size: 16px; }
+.calc-row .out { padding: 6px 14px; background: rgba(110, 231, 255, 0.12);
+  border: 1px solid var(--accent); border-radius: 6px;
+  color: var(--accent); font-weight: 700; font-family: "JetBrains Mono", monospace; }
+</style>
+
+
+<!-- ============== 11a. 评分公式实时计算器 (.score-calc) ============== -->
+<!-- 第 9 章必备:让用户输 C_in / C_bt / C_btsk / N / Maxsingle / Maxmulti 实时算分 -->
+<div class="score-calc">
+  <div class="sc-row">
+    <label>C_inphsc <span class="muted" style="font-size:12px;">Phase 内</span></label>
+    <input type="number" id="scIn" value="0" min="0">
+    <label>C_btphsc <span class="muted" style="font-size:12px;">Phase 间</span></label>
+    <input type="number" id="scBt" value="0" min="0">
+    <label>C_bttskc <span class="muted" style="font-size:12px;">Job 间</span></label>
+    <input type="number" id="scTask" value="8" min="0">
+  </div>
+  <div class="sc-row">
+    <label>总流数 N</label>
+    <input type="number" id="scN" value="12" min="1">
+    <label>Maxsingle_r</label>
+    <input type="number" id="scMs" value="1.0" min="1" step="0.1">
+    <label>Maxmulti_r</label>
+    <input type="number" id="scMm" value="2.0" min="1" step="0.1">
+  </div>
+  <div class="sc-out" id="scOut"></div>
+</div>
+<script>
+const scIds = ['scIn', 'scBt', 'scTask', 'scN', 'scMs', 'scMm'];
+function updateScore() {
+  const Ci = +document.getElementById('scIn').value || 0;
+  const Cb = +document.getElementById('scBt').value || 0;
+  const Ct = +document.getElementById('scTask').value || 0;
+  const N  = Math.max(1, +document.getElementById('scN').value || 1);
+  const Ms = Math.max(1, +document.getElementById('scMs').value || 1);
+  const Mm = Math.max(1, +document.getElementById('scMm').value || 1);
+  const term1 = 20 - (12*Ci + 5*Cb + 3*Ct) / N;
+  const term2 = 40 / Ms;
+  const term3 = 40 / Mm;
+  const fmt = x => x.toFixed(2);
+  document.getElementById('scOut').innerHTML =
+    `20 − (12·${Ci} + 5·${Cb} + 3·${Ct}) / ${N} = <b>${fmt(term1)}</b><br>` +
+    `40 / Maxsingle_r(${Ms}) = <b>${fmt(term2)}</b><br>` +
+    `40 / Maxmulti_r(${Mm}) = <b>${fmt(term3)}</b><br>` +
+    `合计 <span class="total">${fmt(term1+term2+term3)} 分</span>`;
+}
+scIds.forEach(id => document.getElementById(id).addEventListener('input', updateScore));
+updateScore();
+</script>
+<style>
+.score-calc { background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin: 12px 0; }
+.sc-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.sc-row label { color: var(--muted); font-size: 13px; min-width: 120px; }
+.sc-row input { width: 80px; padding: 6px 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; color: var(--text); font-family: "JetBrains Mono", monospace; font-size: 14px; }
+.sc-row input:focus { outline: none; border-color: var(--accent); }
+.sc-out { margin-top: 12px; padding: 12px 14px; background: rgba(110,231,255,0.08); border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; font-family: "JetBrains Mono", monospace; font-size: 14px; line-height: 1.9; }
+.sc-out .total { font-size: 22px; font-weight: 700; color: var(--accent); }
+@media (max-width: 600px) { .sc-row label { min-width: 100%; } }
+</style>
+
+
+<!-- ============== 11. SVG 反比例曲线 ============== -->
+<div class="curve-plot">
+  <svg viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg">
+    <!-- 坐标轴 -->
+    <g stroke="#283354" stroke-width="1">
+      <line x1="60" y1="320" x2="570" y2="320"/>
+      <line x1="60" y1="40" x2="60" y2="320"/>
+    </g>
+    <!-- 网格 -->
+    <g stroke="#1d2748" stroke-width="0.5" stroke-dasharray="3 3">
+      <line x1="60" y1="80" x2="570" y2="80"/>
+      <line x1="60" y1="160" x2="570" y2="160"/>
+      <line x1="60" y1="240" x2="570" y2="240"/>
+    </g>
+    <!-- y 轴标签 -->
+    <g fill="#9ba8c9" font-size="11" text-anchor="end">
+      <text x="55" y="84">40</text>
+      <text x="55" y="164">30</text>
+      <text x="55" y="244">20</text>
+      <text x="55" y="324">10</text>
+    </g>
+    <!-- 曲线 y=40/x,坐标映射:x∈[1.0,3.5]→[60,570];y∈[10,40]→[320,80] -->
+    <path d="M 60 80 Q 100 110 170 145 T 280 200 T 390 233 T 500 254 L 570 262"
+          stroke="#6ee7ff" stroke-width="2.5" fill="none"/>
+    <!-- 关键点标注(只留 1.0 / 1.5 / 2.0 三个里程碑) -->
+    <circle cx="60" cy="80" r="4" fill="#6ee7a3"/>
+    <text x="68" y="76" fill="#6ee7a3" font-size="11">(1.0, 40) 满分</text>
+    <circle cx="170" cy="160" r="4" fill="#f7b955"/>
+    <text x="178" y="156" fill="#f7b955" font-size="11">(1.5, 26.7)</text>
+    <circle cx="280" cy="200" r="4" fill="#ff6e8a"/>
+    <text x="288" y="196" fill="#ff6e8a" font-size="11">(2.0, 20.0)</text>
+
+    <!-- 滑块控制的互动点 -->
+    <circle id="curveDot" cx="280" cy="200" r="7"
+            fill="#6ee7ff" stroke="#fff" stroke-width="2" opacity="0.95"/>
+  </svg>
+  <div style="display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;">
+    <span style="color:var(--muted); font-size:13px;">拖一拖看曲线点:</span>
+    <input type="range" id="curveX" min="1.0" max="3.5" step="0.05" value="2.0"
+           style="flex:1; min-width:200px; accent-color: var(--accent);">
+  </div>
+  <div id="curveTip" style="margin-top:8px; padding:8px 12px;
+       background: rgba(110,231,255,0.08); border-left:2px solid var(--accent);
+       border-radius:0 4px 4px 0; font-family:'JetBrains Mono', monospace;
+       font-size:13px; color: var(--text);">
+    x = 2.00,  得分 = 40/x = 20.00,  扣分 = 20.00
+  </div>
+</div>
+<script>
+// 滑块联动:viewBox 映射 x∈[1.0,3.5] → cx∈[60,570];y∈[10,40] → cy∈[320,80]
+const sliderX = document.getElementById('curveX');
+const tip = document.getElementById('curveTip');
+const dot = document.getElementById('curveDot');
+function updateCurve() {
+  const x = +sliderX.value;
+  const y = 40 / x;
+  const cx = 60 + (x - 1.0) * (510 / 2.5);
+  const cy = 320 - (y - 10) * (240 / 30);
+  dot.setAttribute('cx', cx);
+  dot.setAttribute('cy', cy);
+  tip.textContent = `x = ${x.toFixed(2)},  得分 = 40/x = ${y.toFixed(2)},  扣分 = ${(40 - y).toFixed(2)}`;
+}
+sliderX.addEventListener('input', updateCurve);
+updateCurve();
+</script>
+<style>
+.curve-plot { background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 12px; padding: 12px; text-align: center; overflow-x: auto; }
+.curve-plot svg { max-width: 100%; height: auto; min-width: 480px; }
+</style>
+
+
+<!-- ============== 12. SVG 拓扑(Leaf-Spine 范式) ============== -->
+<div class="topo-wrap">
+  <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg">
+    <!-- 上层节点(Spine) -->
+    <rect x="120" y="20" width="120" height="44" rx="8"
+          fill="#2a1f4a" stroke="#b794f6" stroke-width="2"/>
+    <text x="180" y="46" text-anchor="middle" fill="#e5ecff" font-size="14" font-weight="600">Spine 0</text>
+    <!-- 下层节点(Leaf) -->
+    <rect x="80" y="160" width="160" height="44" rx="8"
+          fill="#0f3a32" stroke="#2dd4bf" stroke-width="2"/>
+    <text x="160" y="186" text-anchor="middle" fill="#e5ecff" font-size="14" font-weight="600">Leaf 0</text>
+    <!-- 连线(可加 .flow-line 类做流动动画) -->
+    <line x1="120" y1="160" x2="160" y2="64" stroke="#6ee7ff" stroke-width="2"/>
+    <!-- 算力卡(圆) -->
+    <circle cx="100" cy="290" r="20" fill="#3d2a08" stroke="#f59e0b" stroke-width="2"/>
+    <text x="100" y="295" text-anchor="middle" fill="#fef3c7" font-size="14" font-weight="700">0</text>
+  </svg>
+  <div class="legend">
+    <span><span class="dot" style="background:#b794f6"></span>Spine</span>
+    <span><span class="dot" style="background:#2dd4bf"></span>Leaf</span>
+  </div>
+</div>
+<style>
+.topo-wrap { background: linear-gradient(180deg, #0d1530, #131c3a);
+  border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-align: center; }
+.topo-wrap svg { max-width: 100%; height: auto; }
+.legend { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center;
+  margin-top: 12px; font-size: 13px; color: var(--muted); }
+.legend .dot { display: inline-block; width: 10px; height: 10px;
+  border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+@keyframes flow { from { stroke-dashoffset: 20; } to { stroke-dashoffset: 0; } }
+.flow-line { stroke-dasharray: 6 4; animation: flow 1.2s linear infinite; }
+</style>

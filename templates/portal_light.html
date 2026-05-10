@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>算法可视化 · your-domain.example</title>
+<style>
+  *,*::before,*::after { box-sizing: border-box; margin:0; padding:0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #fafafa;
+    color: #222;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 72px 24px 40px; flex: 1; width: 100%; }
+  .back-link { display: inline-block; margin-bottom: 16px; color: #999; text-decoration: none; font-size: .85rem; }
+  .back-link:hover { color: #0070f3; }
+  h1 { font-size: 2.2rem; margin-bottom: 6px; letter-spacing: -.5px; }
+  .subtitle { color: #888; margin-bottom: 32px; font-size: .95rem; }
+  h2 {
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 32px 0 16px;
+    color: #999;
+    font-weight: 600;
+  }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .tag-btn {
+    background: #fff;
+    border: 1px solid #eee;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: .85rem;
+    color: #555;
+    cursor: pointer;
+    transition: all .15s ease;
+    font-family: inherit;
+  }
+  .tag-btn:hover { border-color: #0070f3; color: #0070f3; }
+  .tag-btn.active { background: #0070f3; color: #fff; border-color: #0070f3; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .card {
+    display: flex;
+    flex-direction: column;
+    padding: 18px 20px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: all .15s ease;
+    position: relative;
+  }
+  .card:hover {
+    border-color: #0070f3;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,.06);
+  }
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .card-title { font-weight: 600; font-size: 1rem; flex: 1; }
+  .status {
+    font-size: .7rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    flex-shrink: 0;
+  }
+  .status-good { background: #e6f7ee; color: #047a3a; }
+  .status-warn { background: #fef5e3; color: #8a5a00; }
+  .status-mute { background: #f0f0f0; color: #777; }
+  .card-sub {
+    font-size: .78rem;
+    color: #999;
+    margin-bottom: 8px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .card-desc {
+    font-size: .85rem;
+    color: #555;
+    line-height: 1.55;
+    margin-bottom: 12px;
+    flex: 1;
+  }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+  .card-tag {
+    font-size: .7rem;
+    padding: 1px 7px;
+    background: #f3f5fa;
+    color: #6b7280;
+    border-radius: 3px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .card-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px dashed #eee;
+    font-size: .72rem;
+    color: #999;
+  }
+  .arrow { color: #0070f3; transition: transform .2s; font-size: 1rem; }
+  .card:hover .arrow { transform: translateX(3px); }
+  .placeholder {
+    border-style: dashed;
+    background: transparent;
+    cursor: default;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 180px;
+    color: #bbb;
+  }
+  .placeholder:hover { transform: none; box-shadow: none; border-color: #eee; }
+  .placeholder .ico { font-size: 28px; margin-bottom: 6px; opacity: .5; }
+  .empty { color: #aaa; font-size: .9rem; padding: 40px 0; text-align: center; }
+  footer {
+    text-align: center;
+    padding: 24px;
+    border-top: 1px solid #eee;
+    color: #999;
+    font-size: .82rem;
+    background: #fff;
+  }
+  footer a { color: #999; text-decoration: none; }
+  footer a:hover { text-decoration: underline; color: #0070f3; }
+</style>
+</head>
+<body>
+<main>
+  <a class="back-link" href="/">← 返回首页</a>
+  <h1>算法可视化</h1>
+  <p class="subtitle">把一道竞赛题/算法概念从「看不懂」讲到「会算分」 · 单文件交互 HTML</p>
+
+  <h2>分类筛选</h2>
+  <div class="tags" id="tags"></div>
+
+  <h2 id="listHead">所有算法 <span style="color:#bbb;font-weight:400;font-size:.78rem;letter-spacing:0;text-transform:none;margin-left:6px;" id="meta"></span></h2>
+  <div class="grid" id="cards"></div>
+</main>
+
+<footer>
+  <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">陕ICP备2026010778号</a>
+</footer>
+
+<script>
+  const ALGORITHMS = [
+    {
+      id: "nslb",
+      title: "AI 训练集群网络均衡分担",
+      sub: "华为算法挑战赛 S37 · NSLB",
+      desc: "几千张 GPU 互发数据时如何分配上行端口让全网最拥堵的链路尽量轻。讲透 Leaf-Spine 拓扑、三类冲突权重、反比例评分曲线、78 → 100 分的差距怎么来的。",
+      tags: ["在线决策", "网络拓扑", "评分公式", "竞赛"],
+      href: "/algorithms/nslb/",
+      status: "已上线",
+      statusClass: "status-good",
+      date: "2026-05-10",
+      chapters: 14
+    },
+    // 之后加新算法在此追加
+  ];
+
+  const allTags = [...new Set(ALGORITHMS.flatMap(a => a.tags))];
+  let active = 'all';
+
+  function renderTags() {
+    const html = [['all', '全部'], ...allTags.map(t => [t, t])]
+      .map(([k, label]) => `<button class="tag-btn ${k === active ? 'active' : ''}" data-k="${k}">${label}</button>`)
+      .join('');
+    document.getElementById('tags').innerHTML = html;
+    document.querySelectorAll('.tag-btn').forEach(b =>
+      b.addEventListener('click', () => { active = b.dataset.k; renderTags(); renderCards(); }));
+  }
+
+  function renderCards() {
+    const list = active === 'all' ? ALGORITHMS : ALGORITHMS.filter(a => a.tags.includes(active));
+    document.getElementById('meta').textContent = `${list.length} / ${ALGORITHMS.length} 项`;
+
+    if (list.length === 0) {
+      document.getElementById('cards').innerHTML = '<div class="empty">该分类下暂无算法</div>';
+      return;
+    }
+
+    let html = list.map(a => `
+      <a class="card" href="${a.href}">
+        <div class="card-head">
+          <div class="card-title">${a.title}</div>
+          <span class="status ${a.statusClass}">${a.status}</span>
+        </div>
+        <div class="card-sub">${a.sub}</div>
+        <div class="card-desc">${a.desc}</div>
+        <div class="card-tags">${a.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}</div>
+        <div class="card-foot">
+          <span>${a.date} · ${a.chapters} 章</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>`).join('');
+    if (list.length < 3) {
+      html += `<div class="card placeholder">
+        <div class="ico">+</div>
+        <div>更多算法<br>陆续加入中</div>
+      </div>`;
+    }
+    document.getElementById('cards').innerHTML = html;
+  }
+
+  renderTags();
+  renderCards();
+</script>
+</body>
+</html>
