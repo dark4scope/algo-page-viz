@@ -1,6 +1,8 @@
 # algo-page-viz
 
-> 一个 Claude Code [Skill](https://docs.claude.com/en/docs/claude-code/skills)，用于把一道竞赛题或一个复杂技术方案，从「看不懂」讲到「会算分」的入门级交互式 HTML。
+面向 AI 编程助手生态的 Skill 插件。
+
+> 一个 AI coding agent [Skill](https://docs.claude.com/en/docs/claude-code/skills)，用于把一道竞赛题或一个复杂技术方案，从「看不懂」讲到「会算分」的入门级交互式 HTML。
 
 ## 它能做什么
 
@@ -37,14 +39,14 @@ cd ~/.claude/skills
 git clone https://gitee.com/niji123/algo-page-viz.git
 ```
 
-下次启动 Claude Code 时，skill 会被自动加载。在对话里说「做一个网页讲解」「可视化这个算法」「visualize this problem」之类，Claude 会触发它。
+下次启动 AI coding agent 时，skill 会被自动加载。在对话里说「做一个网页讲解」「可视化这个算法」「visualize this problem」之类，agent 会触发它。
 
 ## 用法
 
 最简单的工作流：
 
 1. 把题面 PDF / `score.py` / 参考解文件准备在工作目录
-2. 在 Claude Code 中说：「用 algo-page-viz 给这道题做一个讲解页」
+2. 在 AI coding agent 中说：「用 algo-page-viz 给这道题做一个讲解页」
 3. Skill 会按 `SKILL.md` 里的 14 章默认结构生成单文件 HTML 到 `/tmp/<topic>.html`
 4. 浏览器直接打开，或用 `python3 -m http.server` 起一个临时服务
 
