@@ -146,62 +146,9 @@ cd /tmp && nohup python3 -m http.server 8765 --bind 0.0.0.0 > /tmp/${TOPIC}_serv
 
 给用户 `http://<本机 IP>:8765/${TOPIC}.html`。如果浏览器无法访问,可改用 `file:///tmp/${TOPIC}.html` 直接打开。
 
-### Step 7 — 公网部署(可选)
+### Step 7 — 静态托管(可选)
 
-仅当用户明确要求"放到公网/香港主机/分享给别人"时才做。
-
-**默认目标**:`<your-host-alias>` (<your-server-ip>),sudo 密码 `<your-sudo-password>`(需用户在自己的 CLAUDE.md 中提供)。
-
-**关键坑(全踩过)**:
-1. **云安全组只开特定端口**:8765/8080/8888/18080 等通常未开放;只有标准 web 端口可用——**别期望开新端口**,只能借现有 nginx 80 端口
-2. **server_name 冲突**:多个 server block 用同一 IP/域名时 nginx 只采纳第一个,后加的会被 ignore;直接借现有的 server block 加 location,**不要新建独立 server**
-3. **server-level `return 404` 短路 location**:nginx 在 location 匹配前会先评估 server-level return,所以单独加 `location /xxx` 没用——必须把 `return 404` 包进 `location / { return 404; }`
-4. **`.bak` 文件被 nginx 加载**:`sites-enabled/` 下任何文件都会被加载(不管扩展名),备份要放到 `sites-available/` 或别的地方
-
-**部署模板**:
-
-```bash
-# 1. 上传
-scp /tmp/${TOPIC}.html <your-host-alias>:/tmp/
-
-# 2. 找一个已在 server_name 里包含目标 IP 的 site
-ssh <your-host-alias> 'echo "$SUDOPW" | sudo -S grep -l "<your-server-ip>" /etc/nginx/sites-enabled/*'
-
-# 3. 注入 location 到该 site 的 80 block;同时把 server-level return 404 包进 location /
-# (用 python3 改 nginx config 比 sed 安全)
-ssh <your-host-alias> 'echo "$SUDOPW" | sudo -S bash -c "
-  mkdir -p /var/www/${TOPIC}
-  cp /tmp/${TOPIC}.html /var/www/${TOPIC}/index.html
-
-  SITE=/etc/nginx/sites-enabled/<existing-site>
-  cp \$SITE /etc/nginx/sites-available/<existing-site>.bak.\$(date +%s)
-
-  python3 << PYEOF
-import re
-path = \"\$SITE\"
-with open(path) as f: s = f.read()
-inject = \"\"\"
-    location /${TOPIC}/ {
-        alias /var/www/${TOPIC}/;
-        index index.html;
-    }
-    location = /${TOPIC} { return 301 /${TOPIC}/; }
-\"\"\"
-# 在 80 block 的 return 404 之前注入
-s = re.sub(r\"(listen 80;[^}]*?)(    return 404;)\", r\"\\1\" + inject + r\"\\2\", s, count=1, flags=re.S)
-# 把 server-level return 404 改成 location / { return 404; }
-s = s.replace(\"    return 404; # managed by Certbot\", \"    location / { return 404; }\")
-with open(path, \"w\") as f: f.write(s)
-PYEOF
-
-  nginx -t && systemctl reload nginx
-"'
-
-# 4. 测公网
-env -u http_proxy -u https_proxy curl -sI http://<your-server-ip>/${TOPIC}/ | head -3
-```
-
-成功后 URL 是 `http://<your-server-ip>/${TOPIC}/`。
+生成的 HTML 是单文件静态资源,可托管到任意支持静态文件的服务上(GitHub Pages / Vercel / Netlify / Cloudflare Pages / 自建 web server 等)。仓库里 `scripts/deploy_to_remote.sh` 是一个把 HTML 通过 ssh 上传到远端 web 目录的参考脚本,具体细节按用户自己的环境调整。
 
 ### Step 8 — 收尾
 
