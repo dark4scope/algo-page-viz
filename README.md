@@ -1,5 +1,9 @@
 # algo-page-viz
 
+> 🌐 **国际镜像** · GitHub 镜像（gitee 网页预览受合规审核影响时请到 GitHub 看完整内容）：
+> https://github.com/dark4scope/algo-page-viz
+
+
 面向 AI 编程助手生态的 Skill 插件。
 
 > 一个 AI coding agent [Skill](https://docs.claude.com/en/docs/claude-code/skills)，用于把一道竞赛题或一个复杂技术方案，从「看不懂」讲到「会算分」的入门级交互式 HTML。
