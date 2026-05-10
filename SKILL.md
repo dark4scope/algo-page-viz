@@ -55,7 +55,7 @@ description: "Generate a single-file interactive HTML page that explains an algo
 
 ### 强制约束
 
-- **单文件 HTML**:CSS、JS、SVG 全内嵌,**不引任何 CDN**(代理环境会卡住)
+- **单文件 HTML**:CSS、JS、SVG 全内嵌,**不引任何 CDN**(外网受限环境会卡住)
 - **中文 zh-CN**:除代码标识符外,全中文
 - **响应式**:mobile-first,`@media (max-width: 720px)` 切单列
 - **目录极简**:产出 `/tmp/<topic>.html`,**不入仓库**;若需归档进项目,先确认用户同意
@@ -144,10 +144,7 @@ FILE=/tmp/${TOPIC}.html
 cd /tmp && nohup python3 -m http.server 8765 --bind 0.0.0.0 > /tmp/${TOPIC}_server.log 2>&1 &
 ```
 
-给用户 `http://<本机 IP>:8765/${TOPIC}.html`。如果浏览器 502/卡住,提示三选一:
-1. **Tailscale IP**(`100.x.x.x`)— 通常不被 clash 拦
-2. **`file:///tmp/...`**— 本机直接打开,不走网络
-3. **加 `192.168.0.0/16` 到 clash bypass**
+给用户 `http://<本机 IP>:8765/${TOPIC}.html`。如果浏览器无法访问,可改用 `file:///tmp/${TOPIC}.html` 直接打开。
 
 ### Step 7 — 公网部署(可选)
 
@@ -156,7 +153,7 @@ cd /tmp && nohup python3 -m http.server 8765 --bind 0.0.0.0 > /tmp/${TOPIC}_serv
 **默认目标**:`<your-host-alias>` (<your-server-ip>),sudo 密码 `<your-sudo-password>`(需用户在自己的 CLAUDE.md 中提供)。
 
 **关键坑(全踩过)**:
-1. **云安全组只开特定端口**:8765/8080/8888/18080 等通常 BLOCKED;只有 80/443/3000/8045/12345 等业务端口 OPEN——**别期望开新端口**,只能借现有 nginx 80 端口
+1. **云安全组只开特定端口**:8765/8080/8888/18080 等通常未开放;只有标准 web 端口可用——**别期望开新端口**,只能借现有 nginx 80 端口
 2. **server_name 冲突**:多个 server block 用同一 IP/域名时 nginx 只采纳第一个,后加的会被 ignore;直接借现有的 server block 加 location,**不要新建独立 server**
 3. **server-level `return 404` 短路 location**:nginx 在 location 匹配前会先评估 server-level return,所以单独加 `location /xxx` 没用——必须把 `return 404` 包进 `location / { return 404; }`
 4. **`.bak` 文件被 nginx 加载**:`sites-enabled/` 下任何文件都会被加载(不管扩展名),备份要放到 `sites-available/` 或别的地方
@@ -200,7 +197,7 @@ PYEOF
   nginx -t && systemctl reload nginx
 "'
 
-# 4. 测公网(去代理)
+# 4. 测公网
 env -u http_proxy -u https_proxy curl -sI http://<your-server-ip>/${TOPIC}/ | head -3
 ```
 
@@ -261,7 +258,7 @@ env -u http_proxy -u https_proxy curl -sI http://<your-server-ip>/${TOPIC}/ | he
 
 - ❌ **凭题面 PDF/OCR 推算分公式与口径**:必须读 ground-truth 实现代码;OCR 会把减号丢成加号、把"超出量"和"命中流数"两种口径混淆
 - ❌ **凭印象写 Example 多解法的端口/策略分配**:必须 cat `expected_output_*.txt` 确认实际值;NSLB v1 把 Output 1(全堆同一端口)写成了 Output 3(对称分两端口)的样子,直接误导读者
-- ❌ 引外部 CDN(tailwind/d3/highlight.js):代理拦截会 hang
+- ❌ 引外部 CDN(tailwind/d3/highlight.js):外网受限环境会 hang
 - ❌ 用 React/Vue 之类框架:杀鸡用牛刀,且需 build
 - ❌ 写一堆纯文字段落不带图:这是讲解页不是博客
 - ❌ 把页面放到项目仓库(违反目录极简原则,除非是项目交付物)
